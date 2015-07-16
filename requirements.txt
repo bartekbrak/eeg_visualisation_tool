@@ -1,2 +1,2 @@
-Bokeh
+bokeh==0.9.1
 ipython[notebook]

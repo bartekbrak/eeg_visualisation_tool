@@ -1,2 +1,2 @@
 Bokeh
-Ipython Notebook
+ipython[notebook]

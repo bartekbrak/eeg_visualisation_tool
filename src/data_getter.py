@@ -1,5 +1,5 @@
 import csv
-
+from openpyxl import load_workbook
 
 def unicode_dict_reader(utf8_data, restkey, skip_header=True, **kwargs):
     csv_reader = csv.DictReader(utf8_data, restkey=restkey, **kwargs)
@@ -17,8 +17,22 @@ def unicode_dict_reader(utf8_data, restkey, skip_header=True, **kwargs):
 
 
 def get_from_excel(filename, column_names):
-    pass
+    wb = load_workbook(filename)
+    sheet = wb.get_active_sheet()
+    result = [
+        asdict(person, column_names)
+        for person in
+        sheet.rows
+    ]
+    return result[1:]
 
+def asdict(person, column_names):
+    values = [column.value for column in person]
+    result = {}
+    for name in column_names:
+        result[name] = values.pop(0)
+    result['as'] = values
+    return result
 
 def get_from_csv(filename, column_names):
     with open(filename) as f:

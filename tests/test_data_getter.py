@@ -13,7 +13,7 @@ def test_getting_from_csv():
 
 
 def test_getting_from_excel():
-    result = get_from_excel('tests/test_data/tomek.xlsx', column_names)
+    result = get_from_excel('tests/test_data/dane_tymbark.xlsx', column_names)
     assert isinstance(result, list)
     assert len(result) == 15
     for row in result:

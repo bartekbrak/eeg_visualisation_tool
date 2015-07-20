@@ -45,3 +45,11 @@ def get_from_csv(filename, column_names):
             restkey='as'
         )
         return list(reader)
+
+def get_from_f(f, column_names):
+    reader = unicode_dict_reader(
+        utf8_data=f,
+        fieldnames=column_names,
+        restkey='as'
+    )
+    return list(reader)

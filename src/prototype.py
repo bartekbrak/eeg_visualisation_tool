@@ -37,6 +37,8 @@ def show_figure(*grouped_by):
         video_len, width=800, height=400,
         y_range=Range1d(-1, 1)
     )
+    figure.line(10000, [-2, 2],line_color="red", line_width=4)
+
     x_range = range(0, video_len, 1000)
 
     buttons = get_buttons(figure, grouped, x_range, grouped_by)

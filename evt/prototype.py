@@ -1,7 +1,7 @@
-from src.data_getter import get_from_f
-from src.utils import group_by, get_random_colour, get_figure
-from src.widgets import get_file_widget
-from src.constants import column_name_map
+from evt.data_getter import get_from_f
+from evt.utils import group_by, get_random_colour, get_figure
+from evt.widgets import get_file_widget
+from evt.constants import column_name_map
 from bokeh.plotting import output_notebook, show
 from bokeh.io import vform, output_file
 from bokeh.models import Callback, ColumnDataSource, Button, Range1d
@@ -37,7 +37,7 @@ def show_figure(*grouped_by):
         video_len, width=800, height=400,
         y_range=Range1d(-1, 1)
     )
-    figure.line(10000, [-2, 2],line_color="red", line_width=4)
+    figure.line([0, 0], [-1, 1], line_color="red", line_width=4)
 
     x_range = range(0, video_len, 1000)
 

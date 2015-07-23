@@ -1,132 +1,108 @@
 # https://github.com/bokeh/bokeh/blob/master/examples/embed/embed_multiple.py
 from bokeh.io import vform
-from bokeh.models import ColumnDataSource, Button, Range1d, HoverTool, TapTool, \
-    Callback
-from bokeh.embed import components, file_html
+from bokeh.models import ColumnDataSource, Range1d, HoverTool, TapTool, \
+    Callback, ResizeTool
+from bokeh.embed import file_html
 from bokeh.resources import INLINE
 from bokeh.plotting import figure
 from jinja2 import Environment, PackageLoader
 
 from evt.constants import column_name_map
 from evt.data_getter import get_from_csv
-from evt.prototype import make_callback
-from evt.utils import group_by, get_random_colour
+from evt.utils import group_by, get_random_colour, arithmetic_mean
+from experiments.js import hover_js, tap_js
 
-env = Environment(loader=PackageLoader('evt', 'templates'))
+
+def get_progress_bar():
+    progress_bar_data = {'x': [0, 0], 'y': [-3, 3]}
+    return ColumnDataSource(data=progress_bar_data, name='progress_bar')
+
+
+def get_tools(hover_js, tap_js, progress_bar_name):
+    return (
+        HoverTool(tooltips=None, callback=Callback(code=hover_js)),
+        TapTool(action=Callback(code=tap_js % progress_bar_name))
+    )
+
+
+def get_figure(tools, video_len):
+    f = figure(
+        tools=tools,
+        toolbar_location=None,
+        width=640,
+        height=200,
+        x_range=Range1d(1, video_len),
+        y_range=Range1d(0, 1),
+        x_axis_type='datetime',
+    )
+    f.ygrid.grid_line_alpha = 0.1
+    f.xgrid.grid_line_alpha = 0.2
+    f.yaxis.minor_tick_line_color = None
+    f.yaxis.major_tick_line_color = None
+    # f.yaxis.major_label_text_alpha = 0
+    return f
+
+
+def write_file(layout, progress_bar):
+    env = Environment(loader=PackageLoader('evt', 'templates'))
+    template = env.get_template('mytemplate.html')
+    kwargs = {
+        'line_id': progress_bar._id,
+        'line_y': progress_bar.data['y'],
+        'video_data': open("myvideo.mp4", "rb").read().encode("base64")
+    }
+    html = file_html(layout, INLINE, "my plot", template, kwargs)
+    with open('final.html', 'w') as textfile:
+        textfile.write(html)
+
+
+def get_lines(sampling_rate):
+    for group_description, group in grouped.iteritems():
+        y_data = group['grouped']
+        x_range = [x * sampling_rate for x, _ in enumerate(y_data)]
+        yield ColumnDataSource(data=dict(x=x_range, y=y_data))
+
+def get_mean(data):
+    sub_means = [arithmetic_mean(*person['as']) for person in data]
+    return arithmetic_mean(*sub_means)
 
 data = get_from_csv('tomek.csv', column_name_map)
-
-print 'columns avaialable:', column_name_map
 grouped_by = ('age', 'sex', 'favourite_brand')
-print 'grouped by:', grouped_by
-grouped = group_by([], data)
-
-hover = HoverTool(
-    tooltips = [
-        # ("index", "$index"),
-        ("db", "$y")
-    ]
-)
-
-hover2 = HoverTool(
-    tooltips=None,
-    point_policy='follow_mouse',
-    callback=Callback(
-        code="""
-        if (hover_active) {
-            var x = cb_data['geometry']['x'] / 1000;
-            myvideo.currentTime = x;
-        }
-        """
-    ),
-)
-tap= TapTool(action = Callback(code="""
-    if (cb_obj.get('data')['x'].length == 2) {
-    if (hover_active) {
-        myvideo.play();
-        hover_active = false;
-        console.log('hover was active');
-    } else {
-        myvideo.pause();
-        hover_active = true;
-        console.log('hover was not active');
-    }
-    }
-"""))
-
+grouped = group_by(('age',), data)
 video_len = 10100
-f = figure(
-    # hover
-    # tools='save, reset, ypan, resize, tap',
-    tools= [hover2, tap],
-    # tools='',
-    # tools='tap',
-    toolbar_location='right',
-    width=800,
-    height=200,
-    x_range=Range1d(0, video_len),
-    y_range=Range1d(-2, 2),
-    x_axis_type='datetime',
-    # lod_factor=10,
-    # lod_interval=100,
-    # lod_threshold=None,
-    # lod_timeout=100
+sampling_rate = 333
+
+progress_bar = get_progress_bar()
+f = get_figure(
+    tools=get_tools(hover_js, tap_js, progress_bar.name),
+    video_len=video_len
+)
+f2 = get_figure(tools=get_tools(hover_js, tap_js, progress_bar.name), video_len=video_len)
+f.line('x', 'y', source=progress_bar, line_color='green', line_width=1)
+f2.line('x', 'y', source=progress_bar, line_color='green', line_width=1)
+# mean = ColumnDataSource(data=dict(x=range(0,video_len), y=get_mean(())))
+# f.line('x', 'y', source=mean, line_color='orange', line_width=1)
+f.line(range(0,video_len), get_mean(data), line_color='orange', line_width=1)
+f2.line(range(0,video_len), get_mean(data), line_color='orange', line_width=1)
+
+lines = list(get_lines(sampling_rate))
+f.line(
+    'x', 'y',
+    source=lines[0],
+    color=get_random_colour(),
+    line_width=1,
+)
+f2.line(
+    'x', 'y',
+    source=lines[1],
+    color=get_random_colour(),
+    line_width=1,
 )
 
 
-line = ColumnDataSource(data={'x': [0, 0], 'y': [-3, 3]})
-f.line('x', 'y', source=line, line_color='green', line_width=3)
+layout = vform(f, f2)
 
-x_range = range(0, video_len, 333)
+write_file(layout, progress_bar)
 
-# empty = ColumnDataSource(data=dict(x=[], y=[]))
-
-buttons = []
-for group_description, group in grouped.iteritems():
-    y_data = group['grouped']
-    y_ds = ColumnDataSource(data=dict(x=x_range, y=y_data))
-    # y_ds2 = ColumnDataSource(data=dict(x=x_range, y=y_data))
-    f.line(
-        'x', 'y',
-        source=y_ds,
-        #  legend=group_description,
-        color=get_random_colour(),
-        line_width=1,
-        line_join='round',
-        #         line_dash='dashed'
-    )
-    # line_name = '%s_line' % group_description
-    # source_name = '%s_source' % group_description
-    # this_args = {
-    #     'empty': empty,
-    #     line_name: y_ds,
-    #     source_name: y_ds2,
-    #
-    # }
-    # this_callback = make_callback(this_args, line_name, source_name)
-    # buttons.append(
-    #     Button(label=group_description, callback=this_callback)
-    # )
-# taptool = f.select(type=TapTool)
-# taptool.action = Callback(code="""
-#     alert('tap)
-# """)
-# taptool = f.select(type=TapTool)
-# f.y_range.callback = Callback(code="""
-#     console.log(cb_obj);
-#     console.log(cb_data);
-# """)
-
-layout = vform(f, *buttons)
-
-html_file = 'final.html'
-kwargs = {
-    'line_id': line._id,
-    'line_y': line.data['y']
-}
-template = env.get_template('mytemplate.html')
-html = file_html(layout, INLINE, "my plot", template, kwargs)
-with open(html_file, 'w') as textfile:
-    textfile.write(html)
 # url = 'file:{}'.format(six.moves.urllib.request.pathname2url(os.path.abspath(html_file)))
 # webbrowser.open(url)

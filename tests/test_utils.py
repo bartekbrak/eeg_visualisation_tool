@@ -1,6 +1,6 @@
-from src.constants import column_name_map
-from src.data_getter import get_from_excel
-from src.utils import group_by
+from evt.constants import column_name_map
+from evt.data_getter import get_from_excel
+from evt.utils import group_by
 
 
 def test_group_by():

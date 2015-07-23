@@ -1,5 +1,5 @@
-from src.constants import column_name_map
-from src.data_getter import get_from_csv, get_from_excel
+from evt.constants import column_name_map
+from evt.data_getter import get_from_csv, get_from_excel
 
 
 def test_getting_from_csv():

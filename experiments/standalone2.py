@@ -1,7 +1,7 @@
 # https://github.com/bokeh/bokeh/blob/master/examples/embed/embed_multiple.py
 from bokeh.io import vform
 from bokeh.models import ColumnDataSource, Range1d, HoverTool, TapTool, \
-    Callback, ResizeTool
+    Callback
 from bokeh.embed import file_html
 from bokeh.resources import INLINE
 from bokeh.plotting import figure

@@ -56,7 +56,7 @@ def write_file(layout, progress_bar):
         textfile.write(html)
 
 
-def get_lines(sampling_rate):
+def get_lines(sampling_rate, grouped):
     for group_description, group in grouped.iteritems():
         y_data = group['grouped']
         x_range = [x * sampling_rate for x, _ in enumerate(y_data)]
@@ -85,7 +85,7 @@ f2.line('x', 'y', source=progress_bar, line_color='green', line_width=1)
 f.line(range(0,video_len), get_mean(data), line_color='orange', line_width=1)
 f2.line(range(0,video_len), get_mean(data), line_color='orange', line_width=1)
 
-lines = list(get_lines(sampling_rate))
+lines = list(get_lines(sampling_rate, grouped))
 f.line(
     'x', 'y',
     source=lines[0],

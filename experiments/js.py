@@ -1,13 +1,12 @@
 hover_js = "hover_position=cb_data['geometry']['x'] / 1000;"
 tap_js = '''
     if (cb_obj.get('name') == '%s') {
-    if (hover_active) {
-        // video.currentTime = hover_position;
+    if (ready_to_play) {
         video.play();
-        hover_active = false;
+        ready_to_play = false;
     } else {
         video.pause();
-        hover_active = true;
+        ready_to_play = true;
     }
     }
 '''

@@ -8,7 +8,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", function(event) {
     video = document.querySelector('video');
-	hover_active = true;
+	ready_to_play = true;
     hover_position = 0;
     var progress = 0,
         line_y = {{ line_y }},
@@ -23,18 +23,18 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	    progress_bar.set('data', {x: [progress, progress], y : line_y});
 	    setTimeout(update_progress_bar, update_resolution);
 	}
-    video.addEventListener('ended', function(){hover_active = true;});
+    video.addEventListener('ended', function(){ready_to_play = true;});
     update_progress_bar()
 
 	bk_canvas_events1.addEventListener("dblclick", function () {
         video.pause();
         video.currentTime = hover_position;
-        hover_active = true;
-	});   
+        ready_to_play = true;
+    });
  	bk_canvas_events2.addEventListener("dblclick", function () {
         video.pause();
         video.currentTime = hover_position;
-        hover_active = true;
+        ready_to_play = true;
 	});  
 })
 </script>

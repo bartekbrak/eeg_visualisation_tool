@@ -41,6 +41,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
 <style>
     body {background-color: #200000}
     .bk-logo{ display:none !important; }
+    .color_square {
+        display: inline-block;
+        padding: 5px;
+        border-radius: 10px;
+        border: 2px solid white;
+        color: white;
+        font-family: sans-serif;
+        font-weight: 900;
+    }
+
 </style>
 
 </head>
@@ -52,5 +62,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		</video>
 		{{ plot_div|indent(8) }}
 	</center>
+{% for item in grouped_plot_data.values() %}
+        <div class="color_square" style="background-color: {{ item['color'] }}">
+            {% for filter, value in item['description'].items() %}
+                {{ filter }}: {{ value }};
+            {% endfor %}
+        </div>
+{% endfor %}
 </body>
 </html>

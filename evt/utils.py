@@ -32,7 +32,8 @@ def group_by(by, data):
         )
         result[description_str] = {
             'description': description,
-            'grouped': grouped
+            'y_series': grouped,
+            'color' : get_random_colour()
         }
     return result
 

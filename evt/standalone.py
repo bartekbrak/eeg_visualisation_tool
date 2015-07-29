@@ -43,18 +43,23 @@ def get_figure(tools, video_len):
     return f
 
 
-def write_file(layout, progress_bar, grouped_plot_data):
+def write_file(layout, progress_bar, grouped_plot_data, video_filename):
     env = Environment(loader=PackageLoader('evt', 'templates'))
     template = env.get_template('mytemplate.html')
     kwargs = {
         'progress_bar_id': progress_bar.ref['id'],
         'progress_bar_y': progress_bar.data['y'],
-        'video_data': open('myvideo.mp4').read().encode('base64'),
+        'video_data': get_video_data(video_filename),
         'grouped_plot_data': grouped_plot_data
     }
     html = file_html(layout, INLINE, 'my plot', template, kwargs)
     with open('final.html', 'w') as textfile:
         textfile.write(html)
+
+
+def get_video_data(filename):
+    with open(filename) as f:
+        return f.read().encode('base64')
 
 
 def add_column_data_source(sampling_rate, grouped):
@@ -76,6 +81,7 @@ def main():
     grouped_plot_data = group_by(('age',), data)
     video_len = 10100
     sampling_rate = 333
+    video_filename = 'myvideo.mp4'
 
     progress_bar = get_progress_bar()
     f = get_figure(
@@ -111,4 +117,4 @@ def main():
 
     layout = vform(f, f2)
 
-    write_file(layout, progress_bar, grouped_plot_data)
+    write_file(layout, progress_bar, grouped_plot_data, video_filename)

@@ -27,4 +27,5 @@ def test_group_by():
             assert column_name in k
         assert 'description' in v
         assert 'y_series' in v
+        assert 'color' in v
         assert expected[k] == sum(v['y_series'])

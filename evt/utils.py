@@ -1,5 +1,6 @@
 from itertools import imap
 import itertools
+from operator import itemgetter
 import random
 
 
@@ -7,18 +8,10 @@ def arithmetic_mean(*list_):
     return float(sum(list_)) / len(list_) if len(list_) > 0 else float('nan')
 
 
-def keys(*args):
-    def wrapper(d):
-        values = [d[arg] for arg in args]
-        return values
-
-    return wrapper
-
-
 def group_by(by, data):
-    column_sorted = sorted(data, key=keys(*by))
+    sorted_by_column = sorted(data, key=itemgetter(*by))
     result = {}
-    for key, group in itertools.groupby(column_sorted, keys(*by)):
+    for key, group in itertools.groupby(sorted_by_column, itemgetter(*by)):
         description = dict(zip(by, key))
         description_str = '__'.join(
             ['{}_{}'.format(k, v) for k, v in description.items()]

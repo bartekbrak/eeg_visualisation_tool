@@ -41,22 +41,3 @@ def group_by(by, data):
 def get_random_colour():
     r = lambda: random.randint(0, 255)
     return '#%02X%02X%02X' % (r(), r(), r())
-
-
-def get_figure(
-    x_ms,
-    width=800,
-    title='eeg visualisation grouped',
-    x_axis_label='time',
-    y_axis_label='y', tools='save', **kwargs
-):
-    return figure(
-        title=title,
-        x_axis_label=x_axis_label,
-        y_axis_label=y_axis_label,
-        tools=tools,
-        width=width,
-        x_range=Range1d(0, x_ms),
-        x_axis_type='datetime',
-        **kwargs
-    )

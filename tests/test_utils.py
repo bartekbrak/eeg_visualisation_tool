@@ -45,3 +45,12 @@ def test_arithmetic_mean():
         0.107614463265602
     )
     assert arithmetic_mean(*data) == 0.7082292437525403
+
+def test_arithmetic_mean_on_empty():
+    # Some might say that ZeroDivisionError is wrong here. True, but what would
+    # raising, let's say, a RuntimeError with a string description add here?
+    # Keeping the function short makes it easier to debug, you'll spot the
+    # problem right on. Don't be too paranoid ;). There bigger problems
+    # elsewhere
+    with pytest.raises(ZeroDivisionError):
+        arithmetic_mean()

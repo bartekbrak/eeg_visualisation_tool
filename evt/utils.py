@@ -6,7 +6,7 @@ from evt.constants import data_column_name
 
 
 def arithmetic_mean(*list_):
-    return float(sum(list_)) / len(list_) if len(list_) > 0 else float('nan')
+    return float(sum(list_)) / len(list_)
 
 
 def group_by(column_names, rows):

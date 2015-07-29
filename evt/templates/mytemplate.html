@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         bk_canvas_events1 = document.getElementsByClassName('bk-canvas-events')[0],
         bk_canvas_events2 = document.getElementsByClassName('bk-canvas-events')[1]
     ;
+    console.log('Progress bar CDS id: {{ progress_bar_id }}');
     
 	function update_progress_bar() {
 	    progress = parseInt(video.currentTime * 1000);
@@ -35,7 +36,18 @@ document.addEventListener("DOMContentLoaded", function(event) {
         video.pause();
         video.currentTime = hover_position;
         ready_to_play = true;
-	});  
+	});
+    toggle_line = function(cid) {
+        var line = Bokeh.Collections("ColumnDataSource").get(cid);
+        var line_data = line.get('data'),
+            orig_data = line.get('orig_data');
+        if (orig_data == undefined) line.set('orig_data', line_data);
+        if (Object.keys(line_data).length === 0) {
+            line.set('data', orig_data)
+        } else {
+            line.set('data', {})
+        }
+    }
 })
 </script>
 <style>
@@ -49,6 +61,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         color: white;
         font-family: sans-serif;
         font-weight: 900;
+        cursor: pointer;
     }
 
 </style>
@@ -62,10 +75,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		{{ plot_div|indent(8) }}
 	</center>
 {% for item in grouped_plot_data.values() %}
-        <div class="color_square" style="background-color: {{ item['color'] }}">
-            {% for filter, value in item['description'].items() %}
-                {{ filter }}: {{ value }};
-            {% endfor %}
+    <div class="color_square" style="background-color: {{ item['color'] }}" onclick="toggle_line('{{ item.source._id }}')">
+    <table>
+    {% for filter, value in item['description'].items() %}
+        <tr><td>{{ filter }}:</td><td>{{ value }}</td></tr>
+    {% endfor %}
+        </table>
+
         </div>
 {% endfor %}
 </body>

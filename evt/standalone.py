@@ -43,7 +43,7 @@ def get_figure(tools, video_len):
     return f
 
 
-def write_file(layout, progress_bar):
+def write_file(layout, progress_bar, grouped_plot_data):
     env = Environment(loader=PackageLoader('evt', 'templates'))
     template = env.get_template('mytemplate.html')
     kwargs = {
@@ -113,4 +113,4 @@ def main():
 
     layout = vform(f, f2)
 
-    write_file(layout, progress_bar)
+    write_file(layout, progress_bar, grouped_plot_data)

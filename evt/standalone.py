@@ -70,49 +70,47 @@ def get_mean(data):
     return arithmetic_mean(*sub_means)
 
 
-data = get_from_csv('tomek.csv', column_name_map)
-grouped_by = ('age', 'sex', 'favourite_brand')
-grouped_plot_data = group_by(('age',), data)
-video_len = 10100
-sampling_rate = 333
 
-progress_bar = get_progress_bar()
-f = get_figure(
-    tools=get_tools(hover_js, tap_js, progress_bar.name),
-    video_len=video_len
-)
-f2 = get_figure(
-    tools=get_tools(hover_js, tap_js, progress_bar.name),
-    video_len=video_len
-)
-f.line('x', 'y', source=progress_bar, line_color='green', line_width=1)
-f2.line('x', 'y', source=progress_bar, line_color='green', line_width=1)
-# mean = ColumnDataSource(data=dict(x=range(0,video_len), y=get_mean(())))
-# f.line('x', 'y', source=mean, line_color='orange', line_width=1)
-f.line(range(0, video_len), get_mean(data), line_color='orange', line_width=1)
-f2.line(range(0, video_len), get_mean(data), line_color='orange', line_width=1)
+def main():
+    data = get_from_csv('tomek.csv', column_name_map)
+    grouped_by = ('age', 'sex', 'favourite_brand')
+    grouped_plot_data = group_by(('age',), data)
+    video_len = 10100
+    sampling_rate = 333
 
-add_column_data_source(sampling_rate, grouped_plot_data)
-for v in grouped_plot_data.values():
-    f.line(
-        'x', 'y',
-        source=v['source'],
-        color=v['color'],
-        line_width=1,
+    progress_bar = get_progress_bar()
+    f = get_figure(
+        tools=get_tools(hover_js, tap_js, progress_bar.name),
+        video_len=video_len
     )
-#
-# f2.line(
-#     'x', 'y',
-#     source=lines[1],
-#     color=get_random_colour(),
-#     line_width=1,
-# )
+    f2 = get_figure(
+        tools=get_tools(hover_js, tap_js, progress_bar.name),
+        video_len=video_len
+    )
+    f.line('x', 'y', source=progress_bar, line_color='green', line_width=1)
+    f2.line('x', 'y', source=progress_bar, line_color='green', line_width=1)
+    # mean = ColumnDataSource(data=dict(x=range(0,video_len), y=get_mean(())))
+    # f.line('x', 'y', source=mean, line_color='orange', line_width=1)
+    f.line(range(0, video_len), get_mean(data), line_color='orange', line_width=1)
+    f2.line(range(0, video_len), get_mean(data), line_color='orange', line_width=1)
+
+    add_column_data_source(sampling_rate, grouped_plot_data)
+    for v in grouped_plot_data.values():
+        f.line(
+            'x', 'y',
+            source=v['source'],
+            color=v['color'],
+            line_width=1,
+        )
+    #
+    # f2.line(
+    #     'x', 'y',
+    #     source=lines[1],
+    #     color=get_random_colour(),
+    #     line_width=1,
+    # )
 
 
-layout = vform(f, f2)
+    layout = vform(f, f2)
 
-write_file(layout, progress_bar)
-
-# url = 'file:{}'.format(
-#     six.moves.urllib.request.pathname2url(os.path.abspath(html_file)))
-# webbrowser.open(url)
+    write_file(layout, progress_bar)

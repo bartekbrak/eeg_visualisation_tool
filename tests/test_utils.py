@@ -1,5 +1,7 @@
 import re
+
 import pytest
+
 from evt.constants import column_name_map
 from evt.data_getter import get_from_excel
 from evt.utils import group_by, arithmetic_mean, get_random_colour
@@ -17,7 +19,7 @@ test_data = (
         )
     ),
     (
-        ('age','sex'),
+        ('age', 'sex'),
         (
             ({'age': 1, 'sex': 1}, 5.45),
             ({'age': 1, 'sex': 2}, 22.78),
@@ -26,6 +28,7 @@ test_data = (
         )
     ),
 )
+
 
 @pytest.mark.parametrize('grouping_by,expected', test_data)
 def test_group_by(grouping_by, expected):
@@ -46,6 +49,7 @@ def test_arithmetic_mean():
         0.107614463265602
     )
     assert arithmetic_mean(*data) == 0.7082292437525403
+
 
 def test_arithmetic_mean_on_empty():
     # Some might say that ZeroDivisionError is wrong here. True, but what would

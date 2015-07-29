@@ -51,8 +51,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
 })
 </script>
 <style>
-    body {background-color: #200000}
-    .bk-logo { display:none !important; }
+    body {background-color: #200030}
+    .bk-logo {
+        display:none !important;
+    }
     .color_square {
         display: inline-block;
         padding: 5px;
@@ -63,26 +65,32 @@ document.addEventListener("DOMContentLoaded", function(event) {
         font-weight: 900;
         cursor: pointer;
     }
+    #legend {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+    }
 
 </style>
 
 </head>
-<body>
-	<center>
-	    <video  height=300>
-	   		<source type="video/mp4" src="data:video/mp4;base64,{{video_data}}">
-		</video>
-		{{ plot_div|indent(8) }}
-	</center>
+<body><center>
+    
+    <video height=300>
+        <source type="video/mp4" src="data:video/mp4;base64,{{video_data}}">
+    </video>
+    {{ plot_div|indent(8) }}
+</center>
+<div id="legend">
 {% for item in grouped_plot_data.values() %}
     <div class="color_square" style="background-color: {{ item['color'] }}" onclick="toggle_line('{{ item.source._id }}')">
     <table>
     {% for filter, value in item['description'].items() %}
         <tr><td>{{ filter }}:</td><td>{{ value }}</td></tr>
     {% endfor %}
-        </table>
-
-        </div>
+    </table>
+    </div><br/>
 {% endfor %}
+</div>
 </body>
 </html>

@@ -2,32 +2,31 @@ from itertools import imap
 import itertools
 from operator import itemgetter
 import random
+from evt.constants import data_column_name
 
 
 def arithmetic_mean(*list_):
     return float(sum(list_)) / len(list_) if len(list_) > 0 else float('nan')
 
 
-def group_by(by, data):
-    sorted_by_column = sorted(data, key=itemgetter(*by))
-    result = {}
-    for key, group in itertools.groupby(sorted_by_column, itemgetter(*by)):
-        description = dict(zip(by, key))
-        description_str = '__'.join(
-            ['{}_{}'.format(k, v) for k, v in description.items()]
+def group_by(column_names, rows):
+    sorted_by_column_name = sorted(rows, key=itemgetter(*column_names))
+    grouper = itertools.groupby(
+        sorted_by_column_name, itemgetter(*column_names)
+    )
+    for column_values, grouped_data_rows in grouper:
+        description = _get_description(column_names, column_values)
+        grouped = imap(
+            arithmetic_mean,
+            *[data_row[data_column_name] for data_row in grouped_data_rows]
         )
-        grouped = list(
-            imap(
-                arithmetic_mean,
-                *[person['as'] for person in list(group)]
-            )
-        )
-        result[description_str] = {
-            'description': description,
-            'y_series': grouped,
-            'color': get_random_colour()
-        }
-    return result
+        yield description, grouped
+
+
+def _get_description(column_names, column_values):
+    if len(column_names) == 1:
+        column_values = (column_values,)
+    return dict(zip(column_names, column_values))
 
 
 def get_random_colour():

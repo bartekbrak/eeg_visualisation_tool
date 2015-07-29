@@ -47,8 +47,8 @@ def write_file(layout, progress_bar, grouped_plot_data):
     env = Environment(loader=PackageLoader('evt', 'templates'))
     template = env.get_template('mytemplate.html')
     kwargs = {
-        'line_id': progress_bar.ref['id'],
-        'line_y': progress_bar.data['y'],
+        'progress_bar_id': progress_bar.ref['id'],
+        'progress_bar_y': progress_bar.data['y'],
         'video_data': open('myvideo.mp4', 'rb').read().encode('base64'),
         'grouped_plot_data': grouped_plot_data
     }

@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	ready_to_play = true;
     hover_position = 0;
     var progress = 0,
-        line_y = {{ line_y }},
-        progress_bar = Bokeh.Collections('ColumnDataSource').get('{{ line_id }}'),
+        line_y = {{ progress_bar_y }},
+        progress_bar = Bokeh.Collections('ColumnDataSource').get('{{ progress_bar_id }}'),
         update_resolution = 10,
         bk_canvas_events1 = document.getElementsByClassName('bk-canvas-events')[0],
         bk_canvas_events2 = document.getElementsByClassName('bk-canvas-events')[1]

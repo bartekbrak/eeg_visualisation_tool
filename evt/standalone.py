@@ -18,10 +18,10 @@ def get_progress_bar():
     return ColumnDataSource(data=progress_bar_data, name='progress_bar')
 
 
-def get_tools(hover_js, tap_js, progress_bar_name):
+def get_tools(hover_js_, tap_js_, progress_bar_name):
     return (
-        HoverTool(tooltips=None, callback=Callback(code=hover_js)),
-        TapTool(action=Callback(code=tap_js % progress_bar_name))
+        HoverTool(tooltips=None, callback=Callback(code=hover_js_)),
+        TapTool(action=Callback(code=tap_js_ % progress_bar_name))
     )
 
 
@@ -47,12 +47,12 @@ def write_file(layout, progress_bar, grouped_plot_data):
     env = Environment(loader=PackageLoader('evt', 'templates'))
     template = env.get_template('mytemplate.html')
     kwargs = {
-        'line_id': progress_bar._id,
+        'line_id': progress_bar.ref['id'],
         'line_y': progress_bar.data['y'],
-        'video_data': open("myvideo.mp4", "rb").read().encode("base64"),
+        'video_data': open('myvideo.mp4', 'rb').read().encode('base64'),
         'grouped_plot_data': grouped_plot_data
     }
-    html = file_html(layout, INLINE, "my plot", template, kwargs)
+    html = file_html(layout, INLINE, 'my plot', template, kwargs)
     with open('final.html', 'w') as textfile:
         textfile.write(html)
 
@@ -70,10 +70,9 @@ def get_mean(data):
     return arithmetic_mean(*sub_means)
 
 
-
 def main():
     data = get_from_csv('tomek.csv', column_name_map)
-    grouped_by = ('age', 'sex', 'favourite_brand')
+    # grouped_by = ('age', 'sex', 'favourite_brand')
     grouped_plot_data = group_by(('age',), data)
     video_len = 10100
     sampling_rate = 333
@@ -109,7 +108,6 @@ def main():
     #     color=get_random_colour(),
     #     line_width=1,
     # )
-
 
     layout = vform(f, f2)
 

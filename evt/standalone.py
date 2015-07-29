@@ -49,7 +49,7 @@ def write_file(layout, progress_bar, grouped_plot_data):
     kwargs = {
         'progress_bar_id': progress_bar.ref['id'],
         'progress_bar_y': progress_bar.data['y'],
-        'video_data': open('myvideo.mp4', 'rb').read().encode('base64'),
+        'video_data': open('myvideo.mp4').read().encode('base64'),
         'grouped_plot_data': grouped_plot_data
     }
     html = file_html(layout, INLINE, 'my plot', template, kwargs)

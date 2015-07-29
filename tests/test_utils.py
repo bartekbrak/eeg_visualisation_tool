@@ -1,7 +1,8 @@
+import re
 import pytest
 from evt.constants import column_name_map
 from evt.data_getter import get_from_excel
-from evt.utils import group_by, arithmetic_mean
+from evt.utils import group_by, arithmetic_mean, get_random_colour
 
 
 # rather than checking that the content of a group has
@@ -54,3 +55,7 @@ def test_arithmetic_mean_on_empty():
     # elsewhere
     with pytest.raises(ZeroDivisionError):
         arithmetic_mean()
+
+
+def test_get_random_colour():
+    assert re.match('#[A-F0-9]{6}', get_random_colour())

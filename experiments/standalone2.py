@@ -1,5 +1,4 @@
 # https://github.com/bokeh/bokeh/blob/master/examples/embed/embed_multiple.py
-from pprint import pprint
 from bokeh.io import vform
 from bokeh.models import ColumnDataSource, Range1d, HoverTool, TapTool, \
     Callback
@@ -10,7 +9,7 @@ from jinja2 import Environment, PackageLoader
 
 from evt.constants import column_name_map
 from evt.data_getter import get_from_csv
-from evt.utils import group_by, get_random_colour, arithmetic_mean
+from evt.utils import group_by, arithmetic_mean
 from experiments.js import hover_js, tap_js
 
 
@@ -70,6 +69,7 @@ def get_mean(data):
     sub_means = [arithmetic_mean(*person['as']) for person in data]
     return arithmetic_mean(*sub_means)
 
+
 data = get_from_csv('tomek.csv', column_name_map)
 grouped_by = ('age', 'sex', 'favourite_brand')
 grouped_plot_data = group_by(('age',), data)
@@ -81,13 +81,16 @@ f = get_figure(
     tools=get_tools(hover_js, tap_js, progress_bar.name),
     video_len=video_len
 )
-f2 = get_figure(tools=get_tools(hover_js, tap_js, progress_bar.name), video_len=video_len)
+f2 = get_figure(
+    tools=get_tools(hover_js, tap_js, progress_bar.name),
+    video_len=video_len
+)
 f.line('x', 'y', source=progress_bar, line_color='green', line_width=1)
 f2.line('x', 'y', source=progress_bar, line_color='green', line_width=1)
 # mean = ColumnDataSource(data=dict(x=range(0,video_len), y=get_mean(())))
 # f.line('x', 'y', source=mean, line_color='orange', line_width=1)
-f.line(range(0,video_len), get_mean(data), line_color='orange', line_width=1)
-f2.line(range(0,video_len), get_mean(data), line_color='orange', line_width=1)
+f.line(range(0, video_len), get_mean(data), line_color='orange', line_width=1)
+f2.line(range(0, video_len), get_mean(data), line_color='orange', line_width=1)
 
 add_column_data_source(sampling_rate, grouped_plot_data)
 for v in grouped_plot_data.values():
@@ -96,7 +99,7 @@ for v in grouped_plot_data.values():
         source=v['source'],
         color=v['color'],
         line_width=1,
-        )
+    )
 #
 # f2.line(
 #     'x', 'y',
@@ -110,5 +113,6 @@ layout = vform(f, f2)
 
 write_file(layout, progress_bar)
 
-# url = 'file:{}'.format(six.moves.urllib.request.pathname2url(os.path.abspath(html_file)))
+# url = 'file:{}'.format(
+#     six.moves.urllib.request.pathname2url(os.path.abspath(html_file)))
 # webbrowser.open(url)

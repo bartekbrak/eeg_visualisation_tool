@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	    setTimeout(update_progress_bar, update_resolution);
 	}
     video.addEventListener('ended', function(){ready_to_play = true;});
-    update_progress_bar()
+    update_progress_bar();
 
 	bk_canvas_events1.addEventListener("dblclick", function () {
         video.pause();
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 </script>
 <style>
     body {background-color: #200000}
-    .bk-logo{ display:none !important; }
+    .bk-logo { display:none !important; }
     .color_square {
         display: inline-block;
         padding: 5px;

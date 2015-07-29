@@ -9,7 +9,7 @@ require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager){
         
         events: {
             // List of events and their handlers.
-            'change': 'handle_file_change',
+            'change': 'handle_file_change'
         },
        
         handle_file_change: function(evt) { 
@@ -25,7 +25,7 @@ require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager){
                 file_reader.onload = function(e) {
                     that.model.set('value', e.target.result);
                     that.touch();
-                }
+                };
                 file_reader.readAsText(file);
             } else {
 
@@ -37,7 +37,7 @@ require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager){
             // Set the filename of the file.
             this.model.set('filename', file.name);
             this.touch();
-        },
+        }
     });
         
     // Register the DatePickerView with the widget manager.

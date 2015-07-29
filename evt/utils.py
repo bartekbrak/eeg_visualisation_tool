@@ -1,8 +1,6 @@
 from itertools import imap
 import itertools
 import random
-from bokeh.models import Range1d
-from bokeh.plotting import figure
 
 
 def arithmetic_mean(*list_):
@@ -13,6 +11,7 @@ def keys(*args):
     def wrapper(d):
         values = [d[arg] for arg in args]
         return values
+
     return wrapper
 
 
@@ -33,7 +32,7 @@ def group_by(by, data):
         result[description_str] = {
             'description': description,
             'y_series': grouped,
-            'color' : get_random_colour()
+            'color': get_random_colour()
         }
     return result
 

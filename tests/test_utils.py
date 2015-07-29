@@ -26,5 +26,5 @@ def test_group_by():
         for column_name in grouping_by:
             assert column_name in k
         assert 'description' in v
-        assert 'grouped' in v
-        assert expected[k] == sum(v['grouped'])
+        assert 'y_series' in v
+        assert expected[k] == sum(v['y_series'])

@@ -5,7 +5,8 @@ from numpy import mean
 from evt.constants import data_column_name
 
 
-def group_by(column_names, rows):
+def average_yaxis_by_properties(column_names, rows):
+    # TODO: find out if numpy can do this
     sorted_by_column_name = sorted(rows, key=itemgetter(*column_names))
     grouper = itertools.groupby(
         sorted_by_column_name, itemgetter(*column_names)

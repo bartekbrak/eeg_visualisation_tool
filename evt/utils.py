@@ -1,12 +1,8 @@
-from itertools import imap
 import itertools
 from operator import itemgetter
 import random
+from numpy import mean
 from evt.constants import data_column_name
-
-
-def arithmetic_mean(*list_):
-    return float(sum(list_)) / len(list_)
 
 
 def group_by(column_names, rows):
@@ -16,9 +12,9 @@ def group_by(column_names, rows):
     )
     for column_values, grouped_data_rows in grouper:
         description = _get_description(column_names, column_values)
-        grouped = imap(
-            arithmetic_mean,
-            *[data_row[data_column_name] for data_row in grouped_data_rows]
+        grouped = mean(
+            [data_row[data_column_name] for data_row in grouped_data_rows],
+            axis=0
         )
         yield description, grouped
 

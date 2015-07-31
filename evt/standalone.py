@@ -1,4 +1,7 @@
 # https://github.com/bokeh/bokeh/blob/master/examples/embed/embed_multiple.py
+from collections import namedtuple
+from collections import defaultdict
+from operator import attrgetter
 from bokeh.io import vform
 from bokeh.models import ColumnDataSource, Range1d, HoverTool, TapTool, \
     Callback
@@ -7,15 +10,17 @@ from bokeh.resources import INLINE
 from bokeh.plotting import figure
 import itertools
 from jinja2 import Environment, PackageLoader
+import numpy
 
-from evt.constants import column_name_map
+from evt.constants import column_name_map, filters_columns
 from evt.data_getter import get_from_csv
-from evt.utils import group_by, arithmetic_mean
+from evt.utils import get_random_colour, \
+    average_yaxis_by_properties_separate
 from experiments.js import hover_js, tap_js
 
 
-def get_progress_bar():
-    progress_bar_data = {'x': [0, 0], 'y': [-3, 3]}
+def get_progress_bar(y_min, y_max):
+    progress_bar_data = {'x': [0, 0], 'y': [y_min, y_max]}
     return ColumnDataSource(data=progress_bar_data, name='progress_bar')
 
 
@@ -44,16 +49,10 @@ def get_figure(tools, video_len, **kwargs):
     return f
 
 
-def write_file(layout, progress_bar, grouped_plot_data, video_filename):
+def write_file(layout, **template_args):
     env = Environment(loader=PackageLoader('evt', 'templates'))
     template = env.get_template('mytemplate.html')
-    kwargs = {
-        'progress_bar_id': progress_bar.ref['id'],
-        'progress_bar_y': progress_bar.data['y'],
-        'video_data': get_video_data(video_filename),
-        'grouped_plot_data': grouped_plot_data
-    }
-    html = file_html(layout, INLINE, 'my plot', template, kwargs)
+    html = file_html(layout, INLINE, 'my plot', template, template_args)
     with open('final.html', 'w') as textfile:
         textfile.write(html)
 
@@ -63,68 +62,90 @@ def get_video_data(filename):
         return f.read().encode('base64')
 
 
-def add_column_data_source(sampling_rate, grouped):
-    for group_description, group in grouped.iteritems():
-        y_series = group['y_series']
-        x_range = [x * sampling_rate for x, _ in enumerate(y_series)]
-        cds = ColumnDataSource(data=dict(x=x_range, y=y_series))
-        group['source'] = cds
-
-
-def get_mean(data):
-    sub_means = [arithmetic_mean(*person['as']) for person in data]
-    return arithmetic_mean(*sub_means)
-
-
 def get_data_min_max(grouped_data, key='y_series'):
     list_of_lists = [one[key] for one in grouped_data.values()]
     flat = list(itertools.chain(*list_of_lists))
     return min(flat), max(flat)
 
+Line = namedtuple('Line', 'data, source, description, color')
+
 
 def main():
-    data = get_from_csv('tomek.csv', column_name_map)
-    grouped_by = ('age', 'sex', 'favourite_brand')
-    grouped_plot_data = group_by(grouped_by, data)
     video_len = 10100
     sampling_rate = 333
     video_filename = 'myvideo.mp4'
-    ymin, ymax = get_data_min_max(grouped_plot_data)
-    ymargin = 0.2
-    progress_bar = get_progress_bar()
-    f = get_figure(
-        tools=get_tools(hover_js, tap_js, progress_bar.name),
-        video_len=video_len,
-        y_range=Range1d(ymin - ymargin, ymax + ymargin)
-    )
-    f2 = get_figure(
-        tools=get_tools(hover_js, tap_js, progress_bar.name),
-        video_len=video_len,
-        y_range=Range1d(ymin - ymargin, ymax + ymargin)
-    )
-    f.line('x', 'y', source=progress_bar, line_color='green')
-    f2.line('x', 'y', source=progress_bar, line_color='green')
-    # mean = ColumnDataSource(data=dict(x=range(0,video_len), y=get_mean(())))
-    # f.line('x', 'y', source=mean, line_color='orange')
-    f.line(range(0, video_len), get_mean(data), line_color='orange')
-    f2.line(range(0, video_len), get_mean(data), line_color='orange')
+    no_of_plots = 2
+    y_margin = 0.2
+    filename = 'tomek.csv'
 
-    add_column_data_source(sampling_rate, grouped_plot_data)
-    for v in grouped_plot_data.values():
-        f.line(
-            'x', 'y',
-            source=v['source'],
-            color=v['color'],
-            line_width=1,
+    data = get_from_csv(filename, column_name_map)
+    line_groups = grouper(
+        data,
+        filters_columns,
+        sampling_rate,
+        average_yaxis_by_properties_separate
+    )
+    lines = list(itertools.chain(*line_groups.values()))
+    sources = map(attrgetter('data'), lines)
+    y_min, y_max = numpy.min(sources) - y_margin, numpy.max(sources) + y_margin
+    progress_bar = get_progress_bar(y_min, y_max)
+
+    figures = [
+        get_figure(
+            tools=get_tools(hover_js, tap_js, progress_bar.name),
+            video_len=video_len,
+            y_range=Range1d(y_min, y_max)
         )
-    #
-    # f2.line(
-    #     'x', 'y',
-    #     source=lines[1],
-    #     color=get_random_colour(),
-    #     line_width=1,
-    # )
+        for _ in range(no_of_plots)
+    ]
 
-    layout = vform(f, f2)
+    mean = numpy.mean(sources)
+    for f_ in figures:
+        f_.line(
+            'x', 'y', source=progress_bar, line_color='green')
+        f_.line(
+            range(0, video_len), mean, line_color='orange', line_dash=(3, 6))
+        f_.quad(
+            top=mean,
+            bottom=y_min,
+            left=0,
+            right=video_len,
+            alpha=0.1
 
-    write_file(layout, progress_bar, grouped_plot_data, video_filename)
+        )
+
+    for f_, line in itertools.product(figures, lines):
+        f_.line(
+            'x', 'y',
+            source=line.source,
+            color=line.color,
+            line_width=2
+        )
+    layout = vform(*figures)
+    template_args = {
+        'progress_bar_id': progress_bar.ref['id'],
+        'progress_bar_y': progress_bar.data['y'],
+        'video_data': get_video_data(video_filename),
+        'line_groups': line_groups,
+        'default_groups': ('age', )
+    }
+    write_file(
+        layout,
+        **template_args
+    )
+
+
+def grouper(data, grouped_by, sampling_rate, grouper_f):
+    line_groups = defaultdict(list)
+    for description, y_series, filter_names in grouper_f(grouped_by, data):
+        x_range = range(0, len(y_series) * sampling_rate, sampling_rate)
+        source = ColumnDataSource(data=dict(x=x_range, y=y_series))
+        key = ', '.join(filter_names)
+        line_groups[key].append(
+            Line(y_series, source, description, get_random_colour())
+        )
+    return line_groups
+
+
+if __name__ == '__main__':
+    main()

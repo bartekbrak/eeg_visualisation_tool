@@ -3,52 +3,91 @@
 <head>
 <meta charset="utf-8">
 <title>{{ title if title else "Bokeh Plot" }}</title>
-	{{ plot_resources|indent(8) }}
-	{{ plot_script|indent(8) }}
+    {{ plot_resources|indent(8) }}
+    {{ plot_script|indent(8) }}
 <script>
 document.addEventListener("DOMContentLoaded", function(event) {
-    video = document.querySelector('video');
-	ready_to_play = true;
-    hover_position = 0;
-    var progress = 0,
-        line_y = {{ progress_bar_y }},
-        progress_bar = Bokeh.Collections('ColumnDataSource').get('{{ progress_bar_id }}'),
-        update_resolution = 10,
-        bk_canvas_events1 = document.getElementsByClassName('bk-canvas-events')[0],
-        bk_canvas_events2 = document.getElementsByClassName('bk-canvas-events')[1]
-    ;
-    console.log('Progress bar CDS id: {{ progress_bar_id }}');
-    
-	function update_progress_bar() {
-	    progress = parseInt(video.currentTime * 1000);
-	    progress_bar.set('data', {x: [progress, progress], y : line_y});
-	    setTimeout(update_progress_bar, update_resolution);
-	}
-    video.addEventListener('ended', function(){ready_to_play = true;});
-    update_progress_bar();
-
-	bk_canvas_events1.addEventListener("dblclick", function () {
-        video.pause();
-        video.currentTime = hover_position;
-        ready_to_play = true;
-    });
- 	bk_canvas_events2.addEventListener("dblclick", function () {
-        video.pause();
-        video.currentTime = hover_position;
-        ready_to_play = true;
-	});
-    toggle_line = function(cid) {
-        var line = Bokeh.Collections("ColumnDataSource").get(cid);
-        var line_data = line.get('data'),
-            orig_data = line.get('orig_data');
-        if (orig_data == undefined) line.set('orig_data', line_data);
-        if (Object.keys(line_data).length === 0) {
-            line.set('data', orig_data)
-        } else {
-            line.set('data', {})
-        }
+    evt = {
+        video: document.querySelector('video'),
+        ready_to_play: true,
+        hover_position: 0,
+        progress: 0,
+        line_y: {{ progress_bar_y }},
+        progress_bar: Bokeh.Collections('ColumnDataSource').get('{{ progress_bar_id }}'),
+        update_resolution: 10,
+        bk_canvas_events: document.getElementsByClassName('bk-canvas-events'),
+        update_progress_bar: function() {
+            evt.progress = parseInt(evt.video.currentTime * 1000);
+            evt.progress_bar.set('data', {x: [evt.progress, evt.progress], y : evt.line_y});
+            setTimeout(evt.update_progress_bar, evt.update_resolution);
+        },
+        line_toggle: function(input) {
+            var j = Bokeh.$(input);
+            var id = j.data('id');
+            var line = this.lines[id];
+            if (input.checked) 
+                line.cds.set('data', line.orig_data);
+            else 
+                line.cds.set('data', {});
+        },
+        toggle_video: function() {
+            if (this.ready_to_play) {
+                this.video.play();
+                this.ready_to_play = false;
+            } else {
+                this.video.pause();
+                this.ready_to_play = true;
+            }
+        },
+        rewind_to_hover: function() {
+            evt.video.pause();
+            evt.video.currentTime = evt.hover_position;
+            evt.ready_to_play = true;            
+        },
+        window_keydown: function(event) {
+            if (event.keyCode == 32) evt.toggle_video();
+        },
+        video_ended: function() {
+            evt.ready_to_play = true;
+        },
+        lines: {},
     }
-})
+    Bokeh.$('input.toggler').change(function() {
+        evt.line_toggle(this);
+    });
+    Bokeh.$('input.grouper').change(function() {
+        var group_name = Bokeh.$(this).data("group-name");
+        var togglers = Bokeh.$('input.toggler[data-group-name="' + group_name + '"]')
+        togglers.prop('checked', this.checked)
+        togglers.trigger("change");
+    });    
+    {# prevent leaving focus on the checkbox, we use space to toggle video 
+       which, with focus here, would also toggle the checkbox #}
+    Bokeh.$('input[type=checkbox]').mousedown(function (event) {
+        event.preventDefault();
+    });    
+    
+    {% for group in default_groups %}
+        console.log('{{ group }}')
+        Bokeh.$('input.grouper[data-group-name="{{ group }}"]').prop('checked', true)
+    {% endfor %}
+    
+    for (var i = 0; i < evt.bk_canvas_events.length; i++) {
+        evt.bk_canvas_events[i].addEventListener("dblclick", evt.rewind_to_hover); 
+    }
+    {% for lines in line_groups.values() %}{% for line in lines -%}
+        evt.lines['{{ line.source._id }}'] = {
+            cds: Bokeh.Collections("ColumnDataSource").get('{{ line.source._id }}'),
+            orig_data: Bokeh.Collections("ColumnDataSource").get('{{ line.source._id }}').get('data'),
+            orig_color: '{{ line.color }}'
+        }
+    {% endfor -%}{% endfor %}
+
+    window.addEventListener("keydown", evt.window_keydown);
+    evt.video.addEventListener('ended', evt.video_ended);
+    evt.update_progress_bar();
+    Bokeh.$('input').trigger("change");
+});
 </script>
 <style>
     body {background-color: #200030}
@@ -57,40 +96,59 @@ document.addEventListener("DOMContentLoaded", function(event) {
     }
     .color_square {
         display: inline-block;
-        padding: 5px;
-        border-radius: 10px;
-        border: 2px solid white;
+        padding: 2px 2px 2px 10px;
+        margin: 5px;
+        border-radius: 2px;
+        border: 1px solid white;
         color: white;
         font-family: sans-serif;
-        font-weight: 900;
-        cursor: pointer;
+        // font-weight: 900;
+        min-width: 100px;
+        // cursor: pointer;
     }
     #legend {
-        position: absolute;
-        right: 0px;
-        top: 0px;
+        color:white;
+        // border: 1px solid white;
+        display: inline-block;
+    }
+    table {
+        border-collapse: collapse;
+    }
+
+    #legend table, #legend td {
+        border: 1px solid white;
+    }
+    #legend td {
+        padding: 10px;
+        vertical-align: top
     }
 
 </style>
 
 </head>
 <body><center>
-    
     <video height=300>
         <source type="video/mp4" src="data:video/mp4;base64,{{video_data}}">
     </video>
     {{ plot_div|indent(8) }}
-</center>
+
 <div id="legend">
-{% for item in grouped_plot_data.values() %}
-    <div class="color_square" style="background-color: {{ item['color'] }}" onclick="toggle_line('{{ item.source._id }}')">
-    <table>
-    {% for filter, value in item['description'].items() %}
-        <tr><td>{{ filter }}:</td><td>{{ value }}</td></tr>
+<table>
+{% for group_name, lines in line_groups.iteritems() %}
+    <tr><td>
+        <input type="checkbox" class="grouper" data-group-name="{{ group_name }}">
+        {{ group_name }}
+    </td>
+    <td>
+    {% for line in lines %}
+    <input type="checkbox" class="toggler" data-id="{{ line.source._id }}" data-group-name="{{ group_name }}">
+        {% for filter, value in line.description.items() %} 
+        <div class="color_square" style="background-color: {{ line.color }}">{{ value }}</div> {% endfor %}
+        <br/>
     {% endfor %}
-    </table>
-    </div><br/>
+    </td>
 {% endfor %}
-</div>
+
+</center>
 </body>
 </html>

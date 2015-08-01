@@ -65,11 +65,6 @@ def get_video_data(filename):
         return f.read().encode('base64')
 
 
-def get_data_min_max(grouped_data, key='y_series'):
-    list_of_lists = [one[key] for one in grouped_data.values()]
-    flat = list(itertools.chain(*list_of_lists))
-    return min(flat), max(flat)
-
 Line = namedtuple('Line', 'data, source, description, color')
 
 

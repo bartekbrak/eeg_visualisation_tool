@@ -3,8 +3,7 @@ from collections import namedtuple
 from collections import defaultdict
 from operator import attrgetter
 from bokeh.io import vform
-from bokeh.models import ColumnDataSource, Range1d, HoverTool, TapTool, \
-    Callback
+from bokeh.models import ColumnDataSource, Range1d, HoverTool, Callback
 from bokeh.embed import file_html
 from bokeh.resources import INLINE
 from bokeh.plotting import figure
@@ -12,23 +11,28 @@ import itertools
 from jinja2 import Environment, PackageLoader
 import numpy
 
-from evt.constants import column_name_map, filters_columns
+from evt.constants import column_name_map, filters_columns, data_column_name
 from evt.data_getter import get_from_csv
 from evt.utils import get_random_colour, \
     average_yaxis_by_properties_separate
-from experiments.js import hover_js, tap_js
 
 
-def get_progress_bar(y_min, y_max):
-    progress_bar_data = {'x': [0, 0], 'y': [y_min, y_max]}
-    return ColumnDataSource(data=progress_bar_data, name='progress_bar')
-
-
-def get_tools(hover_js_, tap_js_, progress_bar_name):
+def get_progress_bar():
+    progress_bar_y = [-10, 10]
+    progress_bar_data = {'x': [0, 0], 'y': progress_bar_y}
     return (
-        HoverTool(tooltips=None, callback=Callback(code=hover_js_)),
-        TapTool(action=Callback(code=tap_js_ % progress_bar_name))
+        progress_bar_y,
+        ColumnDataSource(data=progress_bar_data, name='progress_bar')
     )
+
+
+def get_tools():
+    return HoverTool(
+        tooltips=None,
+        callback=Callback(
+            code="evt.hover_position=cb_data['geometry']['x'] / 1000;"
+        )
+    ),
 
 
 def get_figure(tools, video_len, **kwargs):
@@ -78,60 +82,68 @@ def main():
     y_margin = 0.2
     filename = 'tomek.csv'
 
+    # simple calculations
     data = get_from_csv(filename, column_name_map)
-    line_groups = grouper(
-        data,
-        filters_columns,
-        sampling_rate,
-        average_yaxis_by_properties_separate
-    )
-    lines = list(itertools.chain(*line_groups.values()))
-    sources = map(attrgetter('data'), lines)
-    y_min, y_max = numpy.min(sources) - y_margin, numpy.max(sources) + y_margin
-    progress_bar = get_progress_bar(y_min, y_max)
+    mean = get_mean(data)
+    line_groups_per_plot = []
+    figures = []
+    progress_bar_y, progress_bar = get_progress_bar()
+    for _ in range(no_of_plots):
+        line_groups = grouper(
+            data,
+            filters_columns,
+            sampling_rate,
+            average_yaxis_by_properties_separate
+        )
+        line_groups_per_plot.append(line_groups)
+        lines = list(itertools.chain(*line_groups.values()))
+        sources = map(attrgetter('data'), lines)
+        y_min, y_max = \
+            numpy.min(sources) - y_margin, numpy.max(sources) + y_margin
 
-    figures = [
-        get_figure(
-            tools=get_tools(hover_js, tap_js, progress_bar.name),
+        f = get_figure(
+            tools=get_tools(),
             video_len=video_len,
             y_range=Range1d(y_min, y_max)
         )
-        for _ in range(no_of_plots)
-    ]
+        figures.append(f)
+        draw_secondary_elements(f, mean, progress_bar, video_len, y_min)
+        for line in lines:
+            f.line(
+                'x', 'y',
+                source=line.source,
+                color=line.color,
+                line_width=2
+            )
 
-    mean = numpy.mean(sources)
-    for f_ in figures:
-        f_.line(
-            'x', 'y', source=progress_bar, line_color='green')
-        f_.line(
-            range(0, video_len), mean, line_color='orange', line_dash=(3, 6))
-        f_.quad(
-            top=mean,
-            bottom=y_min,
-            left=0,
-            right=video_len,
-            alpha=0.1
-
-        )
-
-    for f_, line in itertools.product(figures, lines):
-        f_.line(
-            'x', 'y',
-            source=line.source,
-            color=line.color,
-            line_width=2
-        )
     layout = vform(*figures)
     template_args = {
         'progress_bar_id': progress_bar.ref['id'],
-        'progress_bar_y': progress_bar.data['y'],
+        'progress_bar_y': progress_bar_y,
         'video_data': get_video_data(video_filename),
-        'line_groups': line_groups,
+        'line_groups_per_plot': line_groups_per_plot,
         'default_groups': ('age', )
     }
     write_file(
         layout,
         **template_args
+    )
+
+
+def get_mean(data):
+    return numpy.mean([row[data_column_name] for row in data])
+
+
+def draw_secondary_elements(f, mean, progress_bar, video_len, y_min):
+    f.line('x', 'y', source=progress_bar, line_color='green')
+    f.line(range(0, video_len), mean, line_color='orange', line_dash=(3, 6))
+    f.quad(
+        top=mean,
+        bottom=y_min,
+        left=0,
+        right=video_len,
+        alpha=0.1
+
     )
 
 

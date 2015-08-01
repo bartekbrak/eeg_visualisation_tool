@@ -1,6 +1,6 @@
 # https://github.com/bokeh/bokeh/blob/master/examples/embed/embed_multiple.py
-from collections import namedtuple
-from collections import defaultdict
+from collections import namedtuple, defaultdict
+from datetime import datetime
 from operator import attrgetter
 from bokeh.io import vform
 from bokeh.models import ColumnDataSource, Range1d, HoverTool, Callback
@@ -13,8 +13,7 @@ import numpy
 
 from evt.constants import column_name_map, filters_columns, data_column_name
 from evt.data_getter import get_from_csv
-from evt.utils import get_random_colour, \
-    average_yaxis_by_properties_separate
+from evt.utils import get_random_colour, average_yaxis_by_properties_separate
 
 
 def get_progress_bar():
@@ -53,11 +52,11 @@ def get_figure(tools, video_len, **kwargs):
     return f
 
 
-def write_file(layout, **template_args):
+def write_file(layout, out_filename, plot_title, **template_args):
     env = Environment(loader=PackageLoader('evt', 'templates'))
     template = env.get_template('mytemplate.html')
-    html = file_html(layout, INLINE, 'my plot', template, template_args)
-    with open('final.html', 'w') as textfile:
+    html = file_html(layout, INLINE, plot_title, template, template_args)
+    with open(out_filename, 'w') as textfile:
         textfile.write(html)
 
 
@@ -78,9 +77,14 @@ def main():
     video_len = 10100
     sampling_rate = 333
     video_filename = 'myvideo.mp4'
-    no_of_plots = 2
+    no_of_plots = 3
+    plot_title = 'Prototype {date}, plots: {no}'.format(
+        date=datetime.now().strftime('%Y.%m.%d'),
+        no=no_of_plots
+    )
+    out_filename ='evt_3plots.html'
     y_margin = 0.2
-    filename = 'tomek.csv'
+    filename = 'tomek2.csv'
 
     # simple calculations
     data = get_from_csv(filename, column_name_map)
@@ -122,7 +126,8 @@ def main():
         'progress_bar_y': progress_bar_y,
         'video_data': get_video_data(video_filename),
         'line_groups_per_plot': line_groups_per_plot,
-        'default_groups': ('age', )
+        'plot_title': plot_title,
+        'out_filename': out_filename
     }
     write_file(
         layout,

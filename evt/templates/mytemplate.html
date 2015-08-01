@@ -89,11 +89,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     Bokeh.$('input[type=checkbox]').mousedown(function (event) {
         event.preventDefault();
     });    
-    
-    {% for group in default_groups %}
-        Bokeh.$('input.grouper[data-group-name="{{ group }}"]').prop('checked', true)
-    {% endfor %}
-    
+ 
     for (var i = 0; i < evt.bk_canvas_events.length; i++) {
         evt.bk_canvas_events[i].addEventListener("dblclick", evt.rewind_to_hover); 
     }
@@ -102,6 +98,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         var plot_wrapper = '.bk-plot-wrapper:eq({i})'.format({i: {{ loop.index0 }}})
 
         Bokeh.$(legend).appendTo(plot_wrapper);
+        Bokeh.$('input.grouper[data-plot-no="{{ loop.index0 }}"]:eq({{ loop.index0 }})').prop('checked', true)
         {% for lines in line_groups.values() %}{% for line in lines -%}
             evt.lines['{{ line.source._id }}'] = {
                 cds: Bokeh.Collections("ColumnDataSource").get('{{ line.source._id }}'),
@@ -121,9 +118,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
 </script>
 <style>
     body {
-        max-width: 1000px;
         margin-left: 200px;
-        background-color: #200030
+        background-color: #2B3856;
+        font-family: sans-serif;
     }
     .bk-logo {
         display:none !important;
@@ -134,15 +131,18 @@ document.addEventListener("DOMContentLoaded", function(event) {
     }
     .color_square {
         display: inline-block;
-        padding: 0px 0px 0px 10px;
+        padding: 2px 10px 2px 10px;
         margin: 5px;
         border-radius: 2px;
         border: 1px solid white;
         color: white;
-        font-family: sans-serif;
-        // font-weight: 900;
+        
+        font-weight: 900;
         min-width: 20px;
-        // cursor: pointer;
+
+    }
+    label, input[type=checkbox] {
+        cursor: pointer;
     }
     .legend {
         // border: 1px solid white;
@@ -151,6 +151,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
         margin-top: 5px;
         vertical-align: middle;
     }
+    .legend td {
+        padding-left: 10px;
+    }
+
     table {
         border-collapse: collapse;
     }
@@ -185,16 +189,18 @@ document.addEventListener("DOMContentLoaded", function(event) {
     <table class="legend" id="legend{{ loop.index }}"><tr>
     {% set outer_loop = loop %}
     {% for group_name, lines in line_groups.iteritems() %}
-        <td>
+        <td><label>
         <input type="checkbox" class="grouper" data-group-name="{{ group_name }}" data-plot-no="{{ outer_loop.index0 }}">
             {{ group_name }}
+        </label>
         <br/>
         {% for line in lines %}
+            <label>
             <input type="checkbox" class="toggler" data-id="{{ line.source._id }}" data-group-name="{{ group_name }}" data-plot-no="{{ outer_loop.index0 }}">
             {% for filter, value in line.description.items() %} 
                 <div class="color_square" style="background-color: {{ line.color }}">{{ value }}</div> 
             {% endfor %}
-            <br/>
+            </label><br/>
         {% endfor %}
         </td>
     {% endfor %}

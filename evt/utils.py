@@ -4,6 +4,11 @@ import random
 from numpy import mean
 from evt.constants import data_column_name
 
+def to_tuple(what):
+    if isinstance(what, basestring):
+        return what,
+    else:
+        return what
 
 def average_yaxis_by_properties(column_names, rows):
     """
@@ -20,7 +25,7 @@ def average_yaxis_by_properties(column_names, rows):
         sorted_by_column_name, sort_key
     )
     for column_values, grouped_data_rows in grouper:
-        description = dict(zip(column_names, column_values))
+        description = dict(zip(column_names, to_tuple(column_values)))
         grouped = mean(
             [data_row[data_column_name] for data_row in grouped_data_rows],
             axis=0
@@ -40,5 +45,5 @@ def average_yaxis_by_properties_separate(column_names, rows):
 
 
 def get_random_colour():
-    r = lambda: random.randint(0, 255)
+    r = lambda: random.randint(0, 196)
     return '#%02X%02X%02X' % (r(), r(), r())

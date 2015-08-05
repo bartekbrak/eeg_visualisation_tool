@@ -72,14 +72,14 @@ def main():
     video_len = 10100
     sampling_rate = 333
     video_filename = 'myvideo.mp4'
-    no_of_plots = 3
+    no_of_plots = 2
     plot_title = 'Prototype {date}, plots: {no}'.format(
         date=datetime.now().strftime('%Y.%m.%d'),
         no=no_of_plots
     )
     out_filename ='evt_3plots.html'
     y_margin = 0.2
-    filename = 'tomek2.csv'
+    filename = 'tomek.csv'
 
     # simple calculations
     data = get_from_csv(filename, column_name_map)

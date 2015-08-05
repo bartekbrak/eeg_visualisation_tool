@@ -43,7 +43,42 @@ def average_yaxis_by_properties_separate(column_names, rows):
         for _ in average_yaxis_by_properties((column_name, ), rows):
             yield _
 
+distinct_colours = [
+    '#ff0000',
+    '#a66c29',
+    '#39e639',
+    '#266399',
+    '#554359',
+    '#f20000',
+    '#403830',
+    '#00f2c2',
+    '#162859',
+    '#d26cd9',
+    '#330000',
+    '#ffbf40',
+    '#006652',
+    '#00008c',
+    '#66005f',
+    '#994d4d',
+    '#998a4d',
+    '#56736d',
+    '#000073',
+    '#330d2b',
+    '#7f2200',
+    '#ccff00',
+    '#00ccff',
+    '#000066',
+    '#f20081',
+    '#401d10',
+    '#2b330d',
+    '#005266',
+    '#6060bf',
+    '#8c466c',
+    '#d9896c',
+    '#bfe673',
+]
 
 def get_random_colour():
+    return distinct_colours.pop()
     r = lambda: random.randint(0, 196)
     return '#%02X%02X%02X' % (r(), r(), r())

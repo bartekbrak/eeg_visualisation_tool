@@ -8,8 +8,8 @@ from bokeh.embed import file_html
 from bokeh.resources import INLINE
 from bokeh.plotting import figure
 import itertools
-from jinja2 import Environment, PackageLoader
 import numpy
+from evt import template_env
 
 from evt.constants import column_name_map, filters_columns, data_column_name
 from evt.data_getter import get_from_csv
@@ -52,10 +52,11 @@ def get_figure(tools, video_len, **kwargs):
     return f
 
 
-def write_file(layout, out_filename, plot_title, **template_args):
-    env = Environment(loader=PackageLoader('evt', 'templates'))
-    template = env.get_template('mytemplate.html')
-    html = file_html(layout, INLINE, plot_title, template, template_args)
+def render_template(layout, plot_title, template, **template_args):
+    return file_html(layout, INLINE, plot_title, template, template_args)
+
+
+def write_file(html, out_filename):
     with open(out_filename, 'w') as textfile:
         textfile.write(html)
 
@@ -68,7 +69,7 @@ def get_video_data(filename):
 Line = namedtuple('Line', 'data, source, description, color')
 
 
-def main():
+def standalone():
     video_len = 10100
     sampling_rate = 333
     video_filename = 'myvideo.mp4'
@@ -77,12 +78,27 @@ def main():
         date=datetime.now().strftime('%Y.%m.%d'),
         no=no_of_plots
     )
-    out_filename ='evt_3plots.html'
+    out_filename = 'evt_3plots.html'
     y_margin = 0.2
     filename = 'tomek.csv'
 
     # simple calculations
     data = get_from_csv(filename, column_name_map)
+    video_data = get_video_data(video_filename)
+    layout, template_args = the_meat(
+        data, no_of_plots, sampling_rate, video_data, video_len, y_margin
+    )
+    content = render_template(
+        layout,
+        plot_title,
+        template=template_env.get_template('mytemplate.html'),
+        **template_args
+    )
+    write_file(content, out_filename)
+
+
+def the_meat(
+        data, no_of_plots, sampling_rate, video_data, video_len, y_margin):
     mean = get_mean(data)
     line_groups_per_plot = []
     figures = []
@@ -114,20 +130,14 @@ def main():
                 color=line.color,
                 line_width=2
             )
-
     layout = vform(*figures)
     template_args = {
         'progress_bar_id': progress_bar.ref['id'],
         'progress_bar_y': progress_bar_y,
-        'video_data': get_video_data(video_filename),
+        'video_data': video_data,
         'line_groups_per_plot': line_groups_per_plot,
-        'plot_title': plot_title,
-        'out_filename': out_filename
     }
-    write_file(
-        layout,
-        **template_args
-    )
+    return layout, template_args
 
 
 def get_mean(data):
@@ -160,4 +170,4 @@ def grouper(data, grouped_by, sampling_rate, grouper_f):
 
 
 if __name__ == '__main__':
-    main()
+    standalone()

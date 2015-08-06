@@ -1,0 +1,78 @@
+{% from "_formhelpers.html" import render_field %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EEG Visualisation Tool Producer</title>
+    <style>
+        body {
+            font: 16px sans-serif;
+            max-width: 790px;
+            color: gray;
+        }
+        td {
+            vertical-align: top;
+            border-bottom: 1px dashed #c3c3c3;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
+    <script>
+document.addEventListener("DOMContentLoaded", function(event) {
+    evt = {
+        download: function (filename, text) {
+            var pom = document.createElement('a');
+            pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            pom.setAttribute('download', filename);
+
+            if (document.createEvent) {
+                var event = document.createEvent('MouseEvents');
+                event.initEvent('click', true, true);
+                pom.dispatchEvent(event);
+            }
+            else {
+                pom.click();
+            }
+        }
+    };
+    $('#submit_btn').click(function (event) {
+        evt.download('test.txt', 'Hello world!');
+        event.preventDefault();
+    });
+
+});
+    </script>
+</head>
+<body>
+<h1>
+    EEG Visualisation Tool Producer
+</h1>
+<p>
+    This is the server side part of the EEG Visualisation Tool. It is meant
+    to be used by the data producer. The end user will have no access here.
+</p>
+<p>
+    Most default parameters are correct and need not be changed. We only
+    provide them here for extensibility in the prototype phase. Do not rely
+    on them to remain here.
+</p>
+<p>
+    Select the file from disk and submit to get a resulting html file. This
+    file is to be saved on disk and passed to the end user / client.
+    The data has to be formatted in precise way. The format will be described
+    soon. For the moment being, use the test file provided.
+</p>
+<form action="" method="POST" enctype="multipart/form-data">
+    <table>
+        {{ render_field(form.file) }}
+        {{ render_field(form.movie) }}
+        {{ render_field(form.no_of_plots) }}
+        {{ render_field(form.sampling_rate) }}
+        {{ render_field(form.y_margin) }}
+        {{ render_field(form.out_filename) }}
+    </table>
+
+
+    <input id="submit_btn" type="submit">
+</form>
+</body>
+</html>

@@ -36,6 +36,7 @@ def get_tools():
 
 def get_figure(tools, video_len, **kwargs):
     f = figure(
+        y_axis_label=u'Skala motywacji',
         tools=tools,
         toolbar_location=None,
         width=640,
@@ -48,6 +49,7 @@ def get_figure(tools, video_len, **kwargs):
     f.xgrid.grid_line_alpha = 0.2
     f.yaxis.minor_tick_line_color = None
     f.yaxis.major_tick_line_color = None
+    f.yaxis.axis_label_text_font_size = '12px'
     # f.yaxis.major_label_text_alpha = 0
     return f
 

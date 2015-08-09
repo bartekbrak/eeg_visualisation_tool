@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='evt',
-    version='2015.07.19.1',
+    version='2015.08.10.0',
     packages=find_packages(include=('evt*',)),
     entry_points={
         'console_scripts': [

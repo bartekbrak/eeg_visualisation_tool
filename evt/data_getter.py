@@ -21,7 +21,7 @@ def unicode_dict_reader(utf8_data, restkey, skip_header=True, **kwargs):
 
 
 def get_from_excel(filename, column_name_map):
-    wb = load_workbook(filename)
+    wb = load_workbook(filename, read_only=True, data_only=True)
     sheet = wb.get_active_sheet()
     result = [
         asdict(person, column_name_map)

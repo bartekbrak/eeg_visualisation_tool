@@ -5,7 +5,7 @@ from numpy import mean
 from evt.constants import data_column_name
 
 def to_tuple(what):
-    if isinstance(what, basestring):
+    if isinstance(what, (basestring, int, float)):
         return what,
     else:
         return what
@@ -43,7 +43,7 @@ def average_yaxis_by_properties_separate(column_names, rows):
         for _ in average_yaxis_by_properties((column_name, ), rows):
             yield _
 
-distinct_colours = [
+distinct_colours = itertools.cycle([
     '#ff0000',
     '#a66c29',
     '#39e639',
@@ -76,9 +76,9 @@ distinct_colours = [
     '#8c466c',
     '#d9896c',
     '#bfe673',
-]
+])
 
 def get_random_colour():
-    return distinct_colours.pop()
-    r = lambda: random.randint(0, 196)
-    return '#%02X%02X%02X' % (r(), r(), r())
+    return distinct_colours.next()
+    # r = lambda: random.randint(0, 196)
+    # return '#%02X%02X%02X' % (r(), r(), r())

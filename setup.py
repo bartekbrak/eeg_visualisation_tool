@@ -2,8 +2,15 @@ from setuptools import setup, find_packages
 
 setup(
     name='evt',
-    version='2015.08.10.0',
+    version='2015.08.10.1',
     packages=find_packages(include=('evt*',)),
+    install_requires=[
+        'bokeh==0.9.1',
+        'ipython[notebook]',
+        'openpyxl==2.2.5',
+        'Flask==0.10.1',
+        'WTForms==2.0.2',
+    ],
     entry_points={
         'console_scripts': [
             'evt_standalone = evt.standalone:standalone',

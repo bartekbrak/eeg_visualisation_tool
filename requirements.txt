@@ -1,6 +1,0 @@
-bokeh==0.9.1
-ipython[notebook]
-openpyxl==2.2.5
--e git+https://github.com/ipython/traitlets.git#egg=traitlets
-Flask==0.10.1
-WTForms==2.0.2

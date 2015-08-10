@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='evt',
-    version='2015.08.10.1',
+    version='2015.08.10.2',
     packages=find_packages(include=('evt*',)),
     install_requires=[
         'bokeh==0.9.1',

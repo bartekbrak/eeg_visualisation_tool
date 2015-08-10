@@ -14,6 +14,9 @@
         vertical-align: top;
         border-bottom: 1px dashed #c3c3c3;
     }
+    .progress { position:relative; width:400px; border: 1px solid #ddd; padding: 1px; border-radius: 3px; }
+    .bar { background-color: #B4F5B4; width:0%; height:20px; border-radius: 3px; }
+    .percent { position:absolute; display:inline-block; top:3px; left:48%; }
 </style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
 <script src="http://malsup.github.com/jquery.form.js"></script>
@@ -33,13 +36,35 @@ $(document).ready(function() {
             })
         }
     };
-    $('#form').ajaxForm(function(response) {
-        if (response.status == 'ok') {
-            var blob = new Blob([response.content], {type: "text/html;charset=utf-8"});
-            saveAs(blob, "evt.html");
+    var bar = $('.bar');
+    var percent = $('.percent');
+    var status = $('#status');
+    $('#form').ajaxForm({
+        dataType: 'json',
+        beforeSend: function() {
+            status.empty();
+            var percentVal = '0%';
+            bar.width(percentVal);
+            percent.html(percentVal);
+        },
+        uploadProgress: function(event, position, total, percentComplete) {
+            var percentVal = percentComplete + '%';
+            bar.width(percentVal);
+            percent.html(percentVal);
+        },
+        success: function() {
+            var percentVal = '100%';
+            bar.width(percentVal);
+            percent.html(percentVal);
+        },
+        complete: function(xhr) {
+            console.log(xhr);
+            if (xhr.responseJSON.status == 'ok') {
+                var blob = new Blob([xhr.responseJSON.content], {type: "text/html;charset=utf-8"});
+                saveAs(blob, "evt.html");
+            } else alert('something went wrong');
+            event.preventDefault();
         }
-        else alert('something went wrong');
-        event.preventDefault();
     });
 
 });
@@ -80,6 +105,7 @@ $(document).ready(function() {
 
 
     <input id="submit_btn" type="submit">
+    <div class="progress"><div class="bar"></div><div class="percent">0%</div></div>
 </form>
 </body>
 </html>

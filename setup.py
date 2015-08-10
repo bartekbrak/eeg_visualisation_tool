@@ -2,8 +2,9 @@ from setuptools import setup, find_packages
 
 setup(
     name='evt',
-    version='2015.08.10.2',
+    version='2015.08.10.3',
     packages=find_packages(include=('evt*',)),
+    include_package_data=True,
     install_requires=[
         'bokeh==0.9.1',
         'ipython[notebook]',

@@ -34,7 +34,6 @@ def get_end_user_file():
     template_args.update(**form.data)
     content = render_template(
         layout,
-        form.data['plot_title'],
         template=template_env.get_template('mytemplate.html'),
         **template_args
     )

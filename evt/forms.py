@@ -1,44 +1,47 @@
+# coding=utf-8
+from __future__ import unicode_literals
 from wtforms import Form, FileField, IntegerField, FloatField, StringField
 
 
 class ServerForm(Form):
     data_file = FileField(
-        description='Excel data source file. CSV will be supported soon.')
+        'Dane',
+        description='Plik Excel 2007/2010/2013.')
     clip = FileField(
-        description='Ad movie file. Any format supported by modern browsers '
-                    'is fine: mp4/ogm etc.'
+        'Klip',
+        description='Klip z nagraniem. MP4 jest rekomendowanym formatem'
     )
-    no_of_plots = IntegerField(
-        default=2,
-        description='How many plots to display?'
+    no_of_plots = StringField(
+        'Liczba wykresów',
+        default="1, 1",
+        description='Liczba wykresów na arkusz. Cyfry rozdzielone przecinkami.'
     )
     sampling_rate = IntegerField(
+        'Próbkowanie',
         default=333,
-        description='EEG sampling rate the data was collected with.'
+        description='Częstotliwość próbkowania zaebranych danych'
     )
     y_margin = FloatField(
+        'Margines Y',
         default=0.2,
-        description='The amount of empty space above and below the lines. '
-                    'Padding.'
+        description='Odległość od górnej i dolnej krawędzi wykresu przy '
+                    'największym wykresie'
     )
     client_name = StringField(
+        'Nazwa klienta',
         default='Nazwa klienta',
-        description='Client\'s name'
     )
     research_name = StringField(
+        'Nazwa Badania',
         default='Nazwa Badania',
-        description='Research title'
     )
     date = StringField(
+        'Data badania',
         default='2015-08-08',
-        description=''
     )
-    sample_size = StringField(
-        default='1000',
-        description='Sample size'
-    )
+    sample_size = StringField('Wielkośc próby', default='1000')
     plot_title = StringField(
-        default='EEG Visualisation Tool',
-        description='The name of the file, displayed in browser tab and '
-                    'window name.'
+        'Nazwa zakładki',
+        default='EEG Dom Badawczy Maison',
+        description='Nazwa zakładki w przeglądarce. pliku wynikowego.'
     )

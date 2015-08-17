@@ -17,6 +17,21 @@
     .progress { position:relative; width:400px; border: 1px solid #ddd; padding: 1px; border-radius: 3px; }
     .bar { background-color: #B4F5B4; width:0%; height:20px; border-radius: 3px; }
     .percent { position:absolute; display:inline-block; top:3px; left:48%; }
+    .header {background-color: #f3f3f3; padding: 10px 0 10px 10px;}
+    #submit_btn {
+        width: 200px;
+        height: 50px;
+        font-size: 20px;
+        display: block;
+
+    }
+    .center {
+        margin-right: auto;
+        margin-left: auto;
+    }
+    .block {
+        display: block;
+    }
 </style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
 <script src="http://malsup.github.com/jquery.form.js"></script>
@@ -70,42 +85,48 @@ $(document).ready(function() {
 });
     </script>
 </head>
-<body>
+<body class="center">
 <h1>
-    EEG Visualisation Tool Producer
+    Formularz producenta.
 </h1>
 <p>
-    This is the server side part of the EEG Visualisation Tool. It is meant
-    to be used by the data producer. The end user will have no access here.
+    Służy do tworzenia plików z wykresami z plików Excela i filmu. Użytkowni
+    końcowy nie ma dostępu do tego formularza. Większość domyślnych parametrów jest poprawna i nie musi być zmieniana.
 </p>
 <p>
-    Most default parameters are correct and need not be changed. We only
-    provide them here for extensibility in the prototype phase. Do not rely
-    on them to remain here.
+    Wprowadź dwa pliki: Excela i klip w formacie mp4. Plik wynikowy zapisz pod
+    wybraną nazwą na dysku i przekaż użytkownikowi końcowemu.
 </p>
-<p>
-    Select the file from disk and submit to get a resulting html file. This
-    file is to be saved on disk and passed to the end user / client.
-    The data has to be formatted in precise way. The format will be described
-    soon. For the moment being, use the test file provided.
-</p>
+<ul>
+    Format
+    <li>Plik Excela może składać się z dowolnej liczby arkuszy.</li>
+    <li>Każdy arkusz może reprezentować inna skalę.</li>
+    <li>Pierwszy rząd każdego arkusza opisuje dane, nazwy kolumn z filtrami będą wyświetlone w pliku końcowym</li>
+    <li>Arkusz powinien zawierać serię danych w kolumnach opisanych as1, as2... asN. </li>
+    <li>Ilość kolumn "as" odpowiada częstotliwości próbkowania. Po przemnożeniu
+        ilości przez częstotliwośc powinniśmy otrzymać długość klipu w milisekundach</li>
+</ul>
 <form id="form" action="{{ get_end_user_file_url }}" method="POST" enctype="multipart/form-data">
     <table>
+        <tr><td class="header" colspan="3">Wymagane pliki</td></tr>
         {{ render_field(form.data_file, required=True) }}
         {{ render_field(form.clip, required=True) }}
-        {{ render_field(form.no_of_plots, type='number', min=0, max=10) }}
+        <tr><td class="header" colspan="3">Konfiguracja</td></tr>
+        {{ render_field(form.no_of_plots) }}
         {{ render_field(form.sampling_rate, type='number', min=0, max=10000) }}
         {{ render_field(form.y_margin, type='number', step='0.1', min=0, max=10) }}
         {{ render_field(form.plot_title) }}
+        <tr><td class="header" colspan="3">Opis klienta</td></tr>
         {{ render_field(form.client_name) }}
         {{ render_field(form.research_name) }}
         {{ render_field(form.date) }}
         {{ render_field(form.sample_size) }}
     </table>
 
-
-    <input id="submit_btn" type="submit">
-    <div class="progress"><div class="bar"></div><div class="percent">0%</div></div>
+    <br>
+    <input class="center" id="submit_btn" type="submit" value="Stwórz">
+    <br>
+    <div class="progress center"><div class="bar"></div><div class="percent center">0%</div></div>
 </form>
 </body>
 </html>

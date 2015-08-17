@@ -1,6 +1,6 @@
 # https://github.com/bokeh/bokeh/blob/master/examples/embed/embed_multiple.py
+from base64 import b64encode
 from collections import namedtuple, defaultdict
-from datetime import datetime
 from operator import attrgetter
 from bokeh.io import vform
 from bokeh.models import ColumnDataSource, Range1d, HoverTool, Callback
@@ -11,8 +11,9 @@ import itertools
 import numpy
 from evt import template_env
 
-from evt.constants import column_name_map, filters_columns, data_column_name
-from evt.data_getter import get_from_csv
+from evt.constants import data_column_name
+from evt.data_getter import get_from_excel
+
 from evt.utils import get_random_colour, average_yaxis_by_properties_separate
 
 
@@ -72,85 +73,94 @@ Line = namedtuple('Line', 'data, source, description, color')
 
 
 def standalone():
-    video_len = 10100
-    sampling_rate = 333
-    video_filename = 'myvideo.mp4'
-    no_of_plots = 2
-    plot_title = 'Prototype {date}, plots: {no}'.format(
-        date=datetime.now().strftime('%Y.%m.%d'),
-        no=no_of_plots
-    )
-    out_filename = 'evt_3plots.html'
-    y_margin = 0.2
-    filename = 'tomek.csv'
+    video_content = open('tymbark.mp4').read()
+    video_encoded = b64encode(video_content)
+    from evt.server import get_video_len
+    video_len = get_video_len(video_content)
+    plots = [1,1]
+    sheets = get_from_excel('tymbark.xlsx')
+    tp = []
+    # will truncate sheets if no_of_plots is smaller
+    for no_of_plots, sheet in zip(plots, sheets):
+        tp.append(dict(no_of_plots=no_of_plots, **sheet))
 
-    # simple calculations
-    data = get_from_csv(filename, column_name_map)
-    video_data = get_video_data(video_filename)
+    rate_ = 333
+    margin_ = 0.2
     layout, template_args = the_meat(
-        data, no_of_plots, sampling_rate, video_data, video_len, y_margin
+        tp, rate_, video_encoded,
+        video_len, margin_
     )
     content = render_template(
         layout,
-        plot_title,
+        '',
         template=template_env.get_template('mytemplate.html'),
         **template_args
     )
-    write_file(content, out_filename)
+    write_file(content, 'out.html')
 
 
 def the_meat(
-        data, no_of_plots, sampling_rate, video_data, video_len, y_margin):
-    mean = get_mean(data)
+        tp, sampling_rate, video_data, video_len, y_margin):
+
     line_groups_per_plot = []
+    totals = []
     figures = []
     progress_bar_y, progress_bar = get_progress_bar()
-    for _ in range(no_of_plots):
-        line_groups = grouper(
-            data,
-            filters_columns,
-            sampling_rate,
-            average_yaxis_by_properties_separate
-        )
-        line_groups_per_plot.append(line_groups)
-        lines = list(itertools.chain(*line_groups.values()))
-        sources = map(attrgetter('data'), lines)
-        y_min, y_max = \
-            numpy.min(sources) - y_margin, numpy.max(sources) + y_margin
-
-        f = get_figure(
-            tools=get_tools(),
-            video_len=video_len,
-            y_range=Range1d(y_min, y_max)
-        )
-        figures.append(f)
-        draw_secondary_elements(f, mean, progress_bar, video_len, y_min)
-        for line in lines:
-            f.line(
-                'x', 'y',
-                source=line.source,
-                color=line.color,
-                line_width=2
+    for g in tp:
+        for _ in range(g['no_of_plots']):
+            line_groups = grouper(
+                g['data'],
+                g['filter_column_names'],
+                sampling_rate,
+                average_yaxis_by_properties_separate
             )
+            line_groups_per_plot.append(line_groups)
+            lines = list(itertools.chain(*line_groups.values()))
+            sources = map(attrgetter('data'), lines)
+            y_min, y_max = \
+                numpy.min(sources) - y_margin, numpy.max(sources) + y_margin
+
+            f = get_figure(
+                tools=get_tools(),
+                video_len=video_len,
+                y_range=Range1d(y_min, y_max)
+            )
+            figures.append(f)
+            valency = get_mean(g['data'])
+            total = get_mean(g['data'], axis=0)
+            x_range = range(0, len(total) * 333, 333)
+            total_cds = ColumnDataSource(data=dict(x=x_range, y=total))
+            total_line = Line(total, total_cds, 'no description', 'red')
+            totals.append(total_line)
+            draw_secondary_elements(f, valency, total_cds, progress_bar, video_len, y_min)
+            for line in lines:
+                f.line(
+                    'x', 'y',
+                    source=line.source,
+                    color=line.color,
+                    line_width=2
+                )
     layout = vform(*figures)
     template_args = {
         'progress_bar_id': progress_bar.ref['id'],
         'progress_bar_y': progress_bar_y,
         'video_data': video_data,
         'line_groups_per_plot': line_groups_per_plot,
+        'totals': totals
     }
     return layout, template_args
 
 
-def get_mean(data):
-    return numpy.mean([row[data_column_name] for row in data])
+def get_mean(data, axis=None):
+    return numpy.mean([row[data_column_name] for row in data], axis)
 
 
-def draw_secondary_elements(f, mean, progress_bar, video_len, y_min):
+def draw_secondary_elements(f, valency, total_cds, progress_bar, video_len, y_min):
     f.line('x', 'y', source=progress_bar, line_color='green')
-    f.line(range(0, video_len), mean, line_color='orange', line_dash=(3, 6))
+    f.line(range(0, video_len), valency, line_color='orange', line_dash=(3, 6))
+    f.line('x', 'y', source=total_cds, line_color='red')
     f.quad(
-        top=mean,
+        top=valency,
         bottom=y_min,
         left=0,
         right=video_len,

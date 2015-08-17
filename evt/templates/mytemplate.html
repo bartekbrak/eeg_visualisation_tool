@@ -27,14 +27,21 @@ document.addEventListener("DOMContentLoaded", function() {
         progress_bar: Bokeh.Collections('ColumnDataSource').get('{{ progress_bar_id }}'),
         update_resolution: 10,
         bk_canvas_events: document.getElementsByClassName('bk-canvas-events'),
+        progress_bar_loop: function () {
+            if (evt.video.paused == false) evt.update_progress_bar()
+            setTimeout(evt.progress_bar_loop, evt.update_resolution);
+        },
         update_progress_bar: function () {
             evt.progress = parseInt(evt.video.currentTime * 1000);
             evt.progress_bar.set('data', {
                 x: [evt.progress, evt.progress],
                 y: evt.line_y
-            });
-            Bokeh.$("#timer").html(evt.fromSeconds(evt.video.currentTime));
-            setTimeout(evt.update_progress_bar, evt.update_resolution);
+            });  
+                // Bokeh.$("#timer").html(evt.fromSeconds(evt.video.currentTime));
+                // evt.cur_index = parseInt((evt.video.currentTime / evt.video.duration) * y_series.length);
+                // cur_value = y_series[evt.cur_index +1]
+                // in_p = parseInt((cur_value - 0.560) / (1.127 - 0.560) * 100)
+                //gauge.set(in_p);                      
         },
         line_toggle: function (input) {
             var j = Bokeh.$(input);
@@ -58,6 +65,7 @@ document.addEventListener("DOMContentLoaded", function() {
             evt.video.pause();
             evt.video.currentTime = evt.hover_position;
             evt.ready_to_play = true;
+            evt.update_progress_bar();
         },
         window_keydown: function (event) {
             if (event.keyCode == 32) {
@@ -99,24 +107,26 @@ document.addEventListener("DOMContentLoaded", function() {
     {% for line_groups in line_groups_per_plot %}
         var legend = '#legend{i}'.format({i: {{ loop.index }}});
         var plot_wrapper = '.bk-plot-wrapper:eq({i})'.format({i: {{ loop.index0 }}});
-
         Bokeh.$(legend).appendTo(plot_wrapper);
 {#        Bokeh.$('input.grouper[data-plot-no="{{ loop.index0 }}"]:eq({{ loop.index0 }})').prop('checked', true);#}
-        {% for lines in line_groups.values() %}{% for line in lines -%}
-            evt.lines['{{ line.source._id }}'] = {
-                cds: Bokeh.Collections("ColumnDataSource").get('{{ line.source._id }}'),
-                orig_data: Bokeh.Collections("ColumnDataSource").get('{{ line.source._id }}').get('data'),
-                orig_color: '{{ line.color }}'
-            };
+    {% for lines in line_groups.values() %}{% for line in lines -%}
+        evt.lines['{{ line.source._id }}'] = {
+            cds: Bokeh.Collections("ColumnDataSource").get('{{ line.source._id }}'),
+            orig_data: Bokeh.Collections("ColumnDataSource").get('{{ line.source._id }}').get('data')
+        };
     {% endfor -%}{% endfor %}{% endfor %}
-
+    {% for total in totals %}
+        evt.lines['{{ total.source._id }}'] = {
+            cds: Bokeh.Collections("ColumnDataSource").get('{{ total.source._id }}'),
+            orig_data: Bokeh.Collections("ColumnDataSource").get('{{ total.source._id }}').get('data')
+        };
+    {% endfor %}
     window.addEventListener("keydown", evt.window_keydown);
     evt.video.addEventListener('ended', evt.video_ended);
     evt.video.addEventListener('mousedown', evt.toggle_video);
-    evt.update_progress_bar();
+    evt.progress_bar_loop();
     Bokeh.$('input').trigger("change");
 
-    
 });
 </script>
 <style>
@@ -231,6 +241,7 @@ document.addEventListener("DOMContentLoaded", function() {
     </video>
     <div id="aftervideo"></div><span id="timer">timer</span>
     {{ plot_div|indent(8) }}
+
 <div id="legend_group">
 {% for line_groups in line_groups_per_plot %}
     <table class="legend" id="legend{{ loop.index }}"><tr>
@@ -251,9 +262,20 @@ document.addEventListener("DOMContentLoaded", function() {
         {% endfor %}
         </td>
     {% endfor %}
+    <td><label>
+        <input
+                type="checkbox"
+                class="toggler"
+                checked
+                data-id="{{ totals[outer_loop.index0].source._id }}"
+                data-group-name=""
+                data-plot-no="">
+        <div class="color_square" style="background-color: red">total</div>
+    </label></td>
     </tr></table>
 {% endfor %}
 </div>
+
 <div id="logo">logo</div>
 <div id="client">
     klient: {{ client_name }}<br/>

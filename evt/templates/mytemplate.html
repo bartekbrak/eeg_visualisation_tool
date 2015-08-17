@@ -16,7 +16,7 @@ String.prototype.format = function (o) {
         }
     );
 };
-var evt = {}; // namespace 
+var evt = {}; // namespace
 document.addEventListener("DOMContentLoaded", function() {
     evt = {
         video: document.querySelector('video'),
@@ -72,10 +72,9 @@ document.addEventListener("DOMContentLoaded", function() {
         fromSeconds: function (seconds) {
             var m = ('0' + Math.floor(seconds / 60)).slice(-2);
             var s = ('0' + parseInt(seconds % 60, 10)).slice(-2);
-            var ms = ('' + (seconds % 1).toFixed(3)).slice(2, 5)
+            var ms = ('' + (seconds % 1).toFixed(3)).slice(2, 5);
             if (isNaN(ms)) ms = '000';
-            var timestring = '{m}:{s}:{ms}'.format({m: m, s: s, ms: ms});
-            return timestring;
+            return '{m}:{s}:{ms}'.format({m: m, s: s, ms: ms});
         }
     };
     Bokeh.$('input.toggler').change(function() {

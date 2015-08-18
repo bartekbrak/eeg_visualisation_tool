@@ -17,7 +17,6 @@ var evt = {}; // namespace
 document.addEventListener("DOMContentLoaded", function() {
     evt = {
         video: document.querySelector('video'),
-        paused: function() {return evt.video.paused},
         hover_position: 0,
         progress: 0,
         // progress bar line y coordinates, two y values that are always bigger than the plot itself 
@@ -26,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // how often to redraw progress bar position in miliseconds
         update_resolution: 10,
         progress_bar_loop: function () {
-            if (! evt.paused()) evt.update_progress_bar()
+            if (! evt.video.paused) evt.update_progress_bar()
             setTimeout(evt.progress_bar_loop, evt.update_resolution);
         },
         update_progress_bar: function () {
@@ -50,19 +49,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 line.cds.set('data', {});
         },
         toggle_video: function () {
-            if (evt.paused()) evt.video.play();
+            if (evt.video.paused) evt.video.play();
             else evt.video.pause();
         },
         rewind_to_hover: function () {
             evt.video.pause();
             evt.video.currentTime = evt.hover_position;
             evt.update_progress_bar();
-        },
-        window_keydown: function (event) {
-            if (event.keyCode == 32) {
-                evt.toggle_video();
-                event.preventDefault();
-            }
         },
         video_ended: function () {
             // evt.ready_to_play = true;
@@ -111,10 +104,15 @@ document.addEventListener("DOMContentLoaded", function() {
     {% endfor %}
     // Events
     Bokeh.$('.bk-canvas-events').on('dblclick', evt.rewind_to_hover);
-    window.addEventListener("keydown", evt.window_keydown);
+    window.addEventListener("keydown", function (event) {
+        if (event.keyCode == 32) {
+            evt.toggle_video();
+            event.preventDefault();
+    });
     evt.video.addEventListener('ended', evt.video_ended);
     evt.video.addEventListener('mousedown', evt.toggle_video);
     evt.progress_bar_loop();
+    // What does this do?
     Bokeh.$('input').trigger("change");
 
 });

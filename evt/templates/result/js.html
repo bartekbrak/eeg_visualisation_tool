@@ -57,9 +57,6 @@ document.addEventListener("DOMContentLoaded", function() {
             evt.video.currentTime = evt.hover_position;
             evt.update_progress_bar();
         },
-        video_ended: function () {
-            // evt.ready_to_play = true;
-        },
         lines: {},
         fromSeconds: function (seconds) {
             var m = ('0' + Math.floor(seconds / 60)).slice(-2);
@@ -109,7 +106,6 @@ document.addEventListener("DOMContentLoaded", function() {
             evt.toggle_video();
             event.preventDefault();
     });
-    evt.video.addEventListener('ended', evt.video_ended);
     evt.video.addEventListener('mousedown', evt.toggle_video);
     evt.progress_bar_loop();
     // What does this do?

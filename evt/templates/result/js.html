@@ -1,0 +1,128 @@
+<script>
+// Python-like string interpolation, usage:
+// alert("I'm {age} years old!".format({ age: 29 }));
+String.prototype.format = function (o) {
+    return this.replace(/{([^{}]*)}/g,
+        function (a, b) {
+            var r = o[b];
+            return typeof r === 'string' || typeof r === 'number' ? r : a;
+        }
+    );
+};
+
+var evt = {}; // namespace
+document.addEventListener("DOMContentLoaded", function() {
+    evt = {
+        video: document.querySelector('video'),
+        ready_to_play: true,
+        hover_position: 0,
+        progress: 0,
+        // progress bar line y coordinates, two y values that are always bigger than the plot itself 
+        line_y: {{ progress_bar_y }},
+        progress_bar: Bokeh.Collections('ColumnDataSource').get('{{ progress_bar_id }}'),
+        // how often to redraw progress bar position in miliseconds
+        update_resolution: 10,
+
+        bk_canvas_events: document.getElementsByClassName('bk-canvas-events'),
+        progress_bar_loop: function () {
+            if (evt.video.paused == false) evt.update_progress_bar()
+            setTimeout(evt.progress_bar_loop, evt.update_resolution);
+        },
+        update_progress_bar: function () {
+            evt.progress = parseInt(evt.video.currentTime * 1000);
+            evt.progress_bar.set('data', {
+                x: [evt.progress, evt.progress],
+                y: evt.line_y
+            });  
+                // Bokeh.$("#timer").html(evt.fromSeconds(evt.video.currentTime));
+                // evt.cur_index = parseInt((evt.video.currentTime / evt.video.duration) * y_series.length);
+                // cur_value = y_series[evt.cur_index +1]
+                // in_p = parseInt((cur_value - 0.560) / (1.127 - 0.560) * 100)
+                //gauge.set(in_p);                      
+        },
+        line_toggle: function (input) {
+            var j = Bokeh.$(input);
+            var id = j.data('id');
+            var line = this.lines[id];
+            if (input.checked)
+                line.cds.set('data', line.orig_data);
+            else
+                line.cds.set('data', {});
+        },
+        toggle_video: function () {
+            if (evt.ready_to_play) {
+                evt.video.play();
+                evt.ready_to_play = false;
+            } else {
+                evt.video.pause();
+                evt.ready_to_play = true;
+            }
+        },
+        rewind_to_hover: function () {
+            evt.video.pause();
+            evt.video.currentTime = evt.hover_position;
+            evt.ready_to_play = true;
+            evt.update_progress_bar();
+        },
+        window_keydown: function (event) {
+            if (event.keyCode == 32) {
+                evt.toggle_video();
+                event.preventDefault();
+            }
+        },
+        video_ended: function () {
+            evt.ready_to_play = true;
+        },
+        lines: {},
+        fromSeconds: function (seconds) {
+            var m = ('0' + Math.floor(seconds / 60)).slice(-2);
+            var s = ('0' + parseInt(seconds % 60, 10)).slice(-2);
+            var ms = ('' + (seconds % 1).toFixed(3)).slice(2, 5);
+            if (isNaN(ms)) ms = '000';
+            return '{m}:{s}:{ms}'.format({m: m, s: s, ms: ms});
+        }
+    };
+    Bokeh.$('input.toggler').change(function() {
+        evt.line_toggle(this);
+    });
+    Bokeh.$('input.grouper').change(function() {
+        var group_name = Bokeh.$(this).data("group-name");
+        var plot_no = Bokeh.$(this).data("plot-no");
+        var togglers = Bokeh.$('input.toggler[data-group-name="' + group_name + '"][data-plot-no="' + plot_no + '"]');
+        togglers.prop('checked', this.checked);
+        togglers.trigger("change");
+    });    
+    {# prevent leaving focus on the checkbox, we use space to toggle video 
+       which, with focus here, would also toggle the checkbox #}
+    Bokeh.$('input[type=checkbox]').mousedown(function (event) {
+        event.preventDefault();
+    });    
+ 
+    for (var i = 0; i < evt.bk_canvas_events.length; i++) {
+        evt.bk_canvas_events[i].addEventListener("dblclick", evt.rewind_to_hover); 
+    }
+    {% for line_groups in line_groups_per_plot %}
+        var legend = '#legend{i}'.format({i: {{ loop.index }}});
+        var plot_wrapper = '.bk-plot-wrapper:eq({i})'.format({i: {{ loop.index0 }}});
+        Bokeh.$(legend).appendTo(plot_wrapper);
+{#        Bokeh.$('input.grouper[data-plot-no="{{ loop.index0 }}"]:eq({{ loop.index0 }})').prop('checked', true);#}
+    {% for lines in line_groups.values() %}{% for line in lines -%}
+        evt.lines['{{ line.source._id }}'] = {
+            cds: Bokeh.Collections("ColumnDataSource").get('{{ line.source._id }}'),
+            orig_data: Bokeh.Collections("ColumnDataSource").get('{{ line.source._id }}').get('data')
+        };
+    {% endfor -%}{% endfor %}{% endfor %}
+    {% for total in totals %}
+        evt.lines['{{ total.source._id }}'] = {
+            cds: Bokeh.Collections("ColumnDataSource").get('{{ total.source._id }}'),
+            orig_data: Bokeh.Collections("ColumnDataSource").get('{{ total.source._id }}').get('data')
+        };
+    {% endfor %}
+    window.addEventListener("keydown", evt.window_keydown);
+    evt.video.addEventListener('ended', evt.video_ended);
+    evt.video.addEventListener('mousedown', evt.toggle_video);
+    evt.progress_bar_loop();
+    Bokeh.$('input').trigger("change");
+
+});
+</script>

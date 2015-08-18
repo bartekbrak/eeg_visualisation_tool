@@ -1,0 +1,52 @@
+<body>
+    <video width=640 controls>
+        <source type="video/mp4" src="data:video/mp4;base64,{{video_data}}">
+    </video>
+    <div id="aftervideo"></div><span id="timer">timer</span>
+    {{ plot_div|indent(8) }}
+
+<div id="legend_group">
+{% for line_groups in line_groups_per_plot %}
+    <table class="legend" id="legend{{ loop.index }}"><tr>
+    {% set outer_loop = loop %}
+    {% for group_name, lines in line_groups.iteritems() %}
+        <td><label>
+        <input type="checkbox" class="grouper" data-group-name="{{ group_name }}" data-plot-no="{{ outer_loop.index0 }}">
+            {{ group_name }}
+        </label>
+        <br/>
+        {% for line in lines %}
+            <label>
+            <input type="checkbox" class="toggler" data-id="{{ line.source._id }}" data-group-name="{{ group_name }}" data-plot-no="{{ outer_loop.index0 }}">
+            {% for filter, value in line.description.items() %} 
+                <div class="color_square" style="background-color: {{ line.color }}">{{ value }}</div> 
+            {% endfor %}
+            </label><br/>
+        {% endfor %}
+        </td>
+    {% endfor %}
+    <td><label>
+        <input
+                type="checkbox"
+                class="toggler"
+                checked
+                data-id="{{ totals[outer_loop.index0].source._id }}"
+                data-group-name=""
+                data-plot-no="">
+        <div class="color_square" style="background-color: red">total</div>
+    </label></td>
+    </tr></table>
+{% endfor %}
+</div>
+
+<div id="logo">logo</div>
+<div id="client">
+    klient: {{ client_name }}<br/>
+    nazwa badania: {{ research_name }}<br>
+    data: {{ date }}<br>
+    próba: {{ sample_size }}
+    <br>
+    <div id="valency"></div>średnia walencyjna
+</div>
+
+</body>

@@ -24,7 +24,7 @@ def server():
         'get_end_user_file_url': url_for('.get_end_user_file'),
         'filesaver': url_for('static', filename='FileSaver.min.js')
     }
-    return template_env.get_template('server.html').render(form=form, **kwargs)
+    return template_env.get_template('producer.html').render(form=form, **kwargs)
 
 
 def get_video_len(video_data):

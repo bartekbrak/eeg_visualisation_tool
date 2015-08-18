@@ -93,7 +93,7 @@ def standalone():
     content = render_template(
         layout,
         '',
-        template=template_env.get_template('mytemplate.html'),
+        template=template_env.get_template('result.html'),
         **template_args
     )
     write_file(content, 'out.html')

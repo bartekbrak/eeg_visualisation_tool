@@ -56,7 +56,7 @@ def get_end_user_file():
     template_args.update(**form.data)
     content = render_template(
         layout,
-        template=template_env.get_template('mytemplate.html'),
+        template=template_env.get_template('result.html'),
         **template_args
     )
 

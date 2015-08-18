@@ -1,5 +1,6 @@
 {# 
 - id always refers to Bokeh model id
+My Javascript style is influenced by my Python code style, sorry, you'll have to deal with that. I know that for-in iterations are not safe, still I prefer them, string formatting has been extended, I prefer single quotes over double when possible, etc.  
 #}
 <script>
 // Python-like string interpolation, usage:
@@ -72,9 +73,13 @@ document.addEventListener("DOMContentLoaded", function() {
     Bokeh.$('input.grouper').change(function() {
         var group_name = Bokeh.$(this).data("group-name");
         var plot_no = Bokeh.$(this).data("plot-no");
-        var togglers = Bokeh.$('input.toggler[data-group-name="' + group_name + '"][data-plot-no="' + plot_no + '"]');
+        var togglers = Bokeh.$(
+            'input.toggler[data-group-name="{group_name}"][data-plot-no="{plot_no}"]'.format({
+                group_name: group_name, plot_no: plot_no
+            })
+        );
         togglers.prop('checked', this.checked);
-        togglers.trigger("change");
+        togglers.trigger('change');
     });    
     {# prevent leaving focus on the checkbox, we use space to toggle video 
        which, with focus here, would also toggle the checkbox #}
@@ -105,6 +110,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (event.keyCode == 32) {
             evt.toggle_video();
             event.preventDefault();
+        }
     });
     evt.video.addEventListener('mousedown', evt.toggle_video);
     evt.progress_bar_loop();

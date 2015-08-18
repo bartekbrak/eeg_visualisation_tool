@@ -11,13 +11,13 @@
     {% set outer_loop = loop %}
     {% for group_name, lines in line_groups.iteritems() %}
         <td><label>
-        <input type="checkbox" class="grouper" data-group-name="{{ group_name }}" data-plot-no="{{ outer_loop.index0 }}">
+        <input type="checkbox" class="grouper" data-group-name="{{ outer_loop.index0 }}-{{ group_name }}">
             {{ group_name }}
         </label>
         <br/>
         {% for line in lines %}
             <label>
-            <input type="checkbox" class="toggler" data-id="{{ line.source._id }}" data-group-name="{{ group_name }}" data-plot-no="{{ outer_loop.index0 }}">
+            <input type="checkbox" class="toggler" data-id="{{ line.source._id }}" data-group-name="{{ outer_loop.index0 }}-{{ group_name }}">
             {% for filter, value in line.description.items() %} 
                 <div class="color_square" style="background-color: {{ line.color }}">{{ value }}</div> 
             {% endfor %}
@@ -30,9 +30,7 @@
                 type="checkbox"
                 class="toggler"
                 checked
-                data-id="{{ totals[outer_loop.index0].source._id }}"
-                data-group-name=""
-                data-plot-no="">
+                data-id="{{ totals[outer_loop.index0].source._id }}">
         <div class="color_square" style="background-color: red">total</div>
     </label></td>
     </tr></table>

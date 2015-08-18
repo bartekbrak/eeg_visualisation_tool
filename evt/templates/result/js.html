@@ -1,30 +1,28 @@
 {# 
-- id always refers to Bokeh model id
-My Javascript style is influenced by my Python code style, sorry, you'll have to deal with that. I know that for-in iterations are not safe, still I prefer them, string formatting has been extended, I prefer single quotes over double when possible, etc.  
+- id always refers to Bokeh model id,
+- I try not to use jinja values inside JS calls, extracting them to variables first,
+- in general flat is better than nested, extract what you can before you use it
 #}
 <script>
-// Python-like string interpolation, usage:
-// alert("I'm {age} years old!".format({ age: 29 }));
-String.prototype.format = function (o) {
-    return this.replace(/{([^{}]*)}/g,
-        function (a, b) {
-            var r = o[b];
-            return typeof r === 'string' || typeof r === 'number' ? r : a;
-        }
-    );
-};
 
 var evt = {}; // namespace
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', function() {
+    // shortcuts
+    var CDS = Bokeh.Collections('ColumnDataSource');
     evt = {
         video: document.querySelector('video'),
         hover_position: 0,
         progress: 0,
-        // progress bar line y coordinates, two y values that are always bigger than the plot itself 
+        // progress bar line y coordinates, two x values that are always bigger than the plot itself 
         line_y: {{ progress_bar_y }},
-        progress_bar: Bokeh.Collections('ColumnDataSource').get('{{ progress_bar_id }}'),
+        progress_bar: CDS.get('{{ progress_bar_id }}'),
         // how often to redraw progress bar position in miliseconds
         update_resolution: 10,
+        // all lines identified by their id
+        lines: {},
+        // grouper togglers relations
+        groupers: {},
+        // functions
         progress_bar_loop: function () {
             if (! evt.video.paused) evt.update_progress_bar()
             setTimeout(evt.progress_bar_loop, evt.update_resolution);
@@ -45,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function() {
             var id = Bokeh.$(input).data('id');
             var line = evt.lines[id];
             if (input.checked)
-                line.cds.set('data', line.cds_orig);
+                line.cds.set('data', line.cds_orig_data);
             else
                 line.cds.set('data', {});
         },
@@ -58,64 +56,73 @@ document.addEventListener("DOMContentLoaded", function() {
             evt.video.currentTime = evt.hover_position;
             evt.update_progress_bar();
         },
-        lines: {},
+        // used for obsolete, custom timer
         fromSeconds: function (seconds) {
             var m = ('0' + Math.floor(seconds / 60)).slice(-2);
             var s = ('0' + parseInt(seconds % 60, 10)).slice(-2);
             var ms = ('' + (seconds % 1).toFixed(3)).slice(2, 5);
             if (isNaN(ms)) ms = '000';
-            return '{m}:{s}:{ms}'.format({m: m, s: s, ms: ms});
+            return m + ':' + s + ':' + ms
         }
     };
-    Bokeh.$('input.toggler').change(function() {
-        evt.line_toggle(this);
-    });
-    Bokeh.$('input.grouper').change(function() {
-        var group_name = Bokeh.$(this).data("group-name");
-        var plot_no = Bokeh.$(this).data("plot-no");
-        var togglers = Bokeh.$(
-            'input.toggler[data-group-name="{group_name}"][data-plot-no="{plot_no}"]'.format({
-                group_name: group_name, plot_no: plot_no
-            })
-        );
-        togglers.prop('checked', this.checked);
-        togglers.trigger('change');
-    });    
-    {# prevent leaving focus on the checkbox, we use space to toggle video 
-       which, with focus here, would also toggle the checkbox #}
-    Bokeh.$('input[type=checkbox]').mousedown(function (event) {
-        event.preventDefault();
-    });
 
     {% for line_groups in line_groups_per_plot %}
-        var legend = '#legend{i}'.format({i: {{ loop.index0 }}});
-        var plot_wrapper = '.bk-plot-wrapper:eq({i})'.format({i: {{ loop.index0 }}});
+        // Append legends to plots so they are displayed one next to the p
+        var legend = '#legend{{ loop.index0 }}'
+        var plot_wrapper = '.bk-plot-wrapper:eq({{ loop.index0 }})'
         Bokeh.$(legend).appendTo(plot_wrapper);
-{#        Bokeh.$('input.grouper[data-plot-no="{{ loop.index0 }}"]:eq({{ loop.index0 }})').prop('checked', true);#}
-    {% for lines in line_groups.values() %}{% for line in lines -%}
-        evt.lines['{{ line.source._id }}'] = {
-            cds: Bokeh.Collections("ColumnDataSource").get('{{ line.source._id }}'),
-            cds_orig: Bokeh.Collections("ColumnDataSource").get('{{ line.source._id }}').get('data')
-        };
-    {% endfor -%}{% endfor %}{% endfor %}
-    {% for total in totals %}
-        evt.lines['{{ total.source._id }}'] = {
-            cds: Bokeh.Collections("ColumnDataSource").get('{{ total.source._id }}'),
-            cds_orig: Bokeh.Collections("ColumnDataSource").get('{{ total.source._id }}').get('data')
-        };
+
+        // Populate lines for further toggling
+        {% for lines in line_groups.values() %}
+            {% for line in lines %}
+                var cds = CDS.get('{{ line.source._id }}');
+                var id = '{{ line.source._id }}';
+                evt.lines[id] = {cds: cds, cds_orig_data: cds.get('data')};
+            {% endfor %}
+        {% endfor %}
     {% endfor %}
-    // Events
+
+    {% for total in totals %}
+        var cds = CDS.get('{{ total.source._id }}');
+        var id = '{{ total.source._id }}';    
+        evt.lines[id] = {cds: cds, cds_orig_data: cds.get('data')};
+    {% endfor %}
+
+    // Toggler is an input connected with one line, grouper groups togglers
+    Bokeh.$('input.grouper').each(function(index) {
+        // Store grouper-toggler relation for later use 
+        var group_name = Bokeh.$(this).data('group-name');
+        var togglers = 'input.toggler[data-group-name="' + group_name + '"]'
+        evt.groupers[group_name] = Bokeh.$(togglers);
+    });     
+    Bokeh.$('input.toggler').change(function() {evt.line_toggle(this); });
+    Bokeh.$('input.grouper').change(function() {
+        var group_name = Bokeh.$(this).data('group-name');
+        evt.groupers[group_name].prop('checked', this.checked);
+        evt.groupers[group_name].trigger('change');
+    });  
+    // Now make all lines visible in accordance to their input states
+    Bokeh.$('input').trigger('change');
+
+
+    // Mouse and keyobard events
     Bokeh.$('.bk-canvas-events').on('dblclick', evt.rewind_to_hover);
-    window.addEventListener("keydown", function (event) {
+    window.addEventListener('keydown', function (event) {
         if (event.keyCode == 32) {
             evt.toggle_video();
             event.preventDefault();
         }
     });
     evt.video.addEventListener('mousedown', evt.toggle_video);
+    // prevent leaving focus on the checkbox, we use space to toggle video 
+    // which would also toggle the checkbox 
+    Bokeh.$('input[type=checkbox]').mousedown(function (event) {
+        event.preventDefault();
+    });    
+
+    // Start the main progress bar loop
     evt.progress_bar_loop();
-    // What does this do?
-    Bokeh.$('input').trigger("change");
+    
 
 });
 </script>

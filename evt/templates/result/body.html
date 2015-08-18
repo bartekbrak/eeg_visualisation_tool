@@ -7,7 +7,7 @@
 
 <div id="legend_group">
 {% for line_groups in line_groups_per_plot %}
-    <table class="legend" id="legend{{ loop.index }}"><tr>
+    <table class="legend" id="legend{{ loop.index0 }}"><tr>
     {% set outer_loop = loop %}
     {% for group_name, lines in line_groups.iteritems() %}
         <td><label>

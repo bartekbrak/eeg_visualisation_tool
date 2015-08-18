@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     {% for line_groups in line_groups_per_plot %}
-        var legend = '#legend{i}'.format({i: {{ loop.index }}});
+        var legend = '#legend{i}'.format({i: {{ loop.index0 }}});
         var plot_wrapper = '.bk-plot-wrapper:eq({i})'.format({i: {{ loop.index0 }}});
         Bokeh.$(legend).appendTo(plot_wrapper);
 {#        Bokeh.$('input.grouper[data-plot-no="{{ loop.index0 }}"]:eq({{ loop.index0 }})').prop('checked', true);#}

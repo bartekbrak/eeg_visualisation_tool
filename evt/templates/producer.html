@@ -105,6 +105,10 @@ $(document).ready(function() {
     <li>Arkusz powinien zawierać serię danych w kolumnach opisanych as1, as2... asN. </li>
     <li>Ilość kolumn "as" odpowiada częstotliwości próbkowania. Po przemnożeniu
         ilości przez częstotliwośc powinniśmy otrzymać długość klipu w milisekundach</li>
+    <li>wszystkie kolumny muszą być nazwane</li>
+    <li>Nie dodawaj zbędnych kolumn, kolumny albo odpowiadają za filtry albo są to kolumny z danymi (asN)</li>
+    <li>Skasuj nieużywane arkusze</li>
+
 </ul>
 <form id="form" action="{{ get_end_user_file_url }}" method="POST" enctype="multipart/form-data">
     <table>

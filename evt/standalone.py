@@ -108,17 +108,26 @@ def the_meat(
     progress_bar_y, progress_bar = get_progress_bar()
     for g in tp:
         for _ in range(g['no_of_plots']):
-            line_groups = grouper(
-                g['data'],
-                g['filter_column_names'],
-                sampling_rate,
-                average_yaxis_by_properties_separate
-            )
-            line_groups_per_plot.append(line_groups)
-            lines = list(itertools.chain(*line_groups.values()))
-            sources = map(attrgetter('data'), lines)
-            y_min, y_max = \
-                numpy.min(sources) - y_margin, numpy.max(sources) + y_margin
+            valency = get_mean(g['data'])
+            total = get_mean(g['data'], axis=0)
+            if g['filter_column_names']:
+                line_groups = grouper(
+                    g['data'],
+                    g['filter_column_names'],
+                    sampling_rate,
+                    average_yaxis_by_properties_separate
+                )
+                line_groups_per_plot.append(line_groups)
+                lines = list(itertools.chain(*line_groups.values()))
+                sources = map(attrgetter('data'), lines)
+                y_min, y_max = \
+                    numpy.min(sources) - y_margin, numpy.max(sources) + y_margin
+            else:
+                y_min, y_max = \
+                    numpy.min(total) - y_margin, numpy.max(total) + y_margin
+                # FIXME: Smelly, find a better way
+
+                line_groups_per_plot.append({})
 
             f = get_figure(
                 tools=get_tools(),
@@ -126,20 +135,20 @@ def the_meat(
                 y_range=Range1d(y_min, y_max)
             )
             figures.append(f)
-            valency = get_mean(g['data'])
-            total = get_mean(g['data'], axis=0)
-            x_range = range(0, len(total) * 333, 333)
+
+            x_range = range(0, len(total) * sampling_rate, sampling_rate)
             total_cds = ColumnDataSource(data=dict(x=x_range, y=total))
             total_line = Line(total, total_cds, 'no description', 'red')
             totals.append(total_line)
             draw_secondary_elements(f, valency, total_cds, progress_bar, video_len, y_min)
-            for line in lines:
-                f.line(
-                    'x', 'y',
-                    source=line.source,
-                    color=line.color,
-                    line_width=2
-                )
+            if g['filter_column_names']:
+                for line in lines:
+                    f.line(
+                        'x', 'y',
+                        source=line.source,
+                        color=line.color,
+                        line_width=2
+                    )
     layout = vform(*figures)
     template_args = {
         'progress_bar_id': progress_bar.ref['id'],

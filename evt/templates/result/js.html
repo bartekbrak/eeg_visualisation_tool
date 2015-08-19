@@ -66,12 +66,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    {% for line_groups in line_groups_per_plot %}
-        // Append legends to plots so they are displayed one next to the p
-        var legend = '#legend{{ loop.index0 }}'
-        var plot_wrapper = '.bk-plot-wrapper:eq({{ loop.index0 }})'
+    Bokeh.$('.bk-plot-wrapper').each(function(index) {
+        // Append legends to plots
+        var legend = '#legend' + index;
+        var plot_wrapper = '.bk-plot-wrapper:eq(' + index + ')';
         Bokeh.$(legend).appendTo(plot_wrapper);
+    });
 
+
+    {% for line_groups in line_groups_per_plot %}
         // Populate lines for further toggling
         {% for lines in line_groups.values() %}
             {% for line in lines %}

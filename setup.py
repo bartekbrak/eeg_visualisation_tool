@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='evt',
-    version='2015.08.24.1',
+    version='2015.08.24.2',
     packages=find_packages(include=('evt*',)),
     include_package_data=True,
     install_requires=[

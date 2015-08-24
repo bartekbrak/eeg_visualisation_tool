@@ -18,7 +18,7 @@ class ServerForm(Form):
     )
     sampling_rate = IntegerField(
         'Próbkowanie',
-        default=333,
+        default=100,
         description='Częstotliwość próbkowania zaebranych danych'
     )
     y_margin = FloatField(

@@ -1,26 +1,24 @@
 <style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
     body {
-        margin-left: 200px;
+        margin-left: 80px;
         background: white url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wgFFg0bD3LXygAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAATNSURBVHja7drdTuM6FIDRHTsuFMH7vyjiJ3Hic5WoQDPNHB1pmjNrSVxQakZi8mXbbbvWWgvgquRPAAIBgYBAQCAgEBAICAQEAgIBBAICAYGAQEAgIBAQCAgEBAICAQQCAgGBgEBAICAQEAgIBAQCCAQEAgIBgYBAQCAgEBAICAQEAggEflP/J//x19fXq4/nnCPnHH3fR0pp17qu66KUEqWU6Lpu8/mn0ylOp9OXn9da4+PjY/3++fnZlcH9TpBpmmIYhnh7e4tpmnataa3FMAwxDMMvn1dr/fHYOI6uBO5vgny/Y7fWYp7nmOc5hmGI1lq8v7/H09PT1UmyrJvnOcZxXL8eHh42J1OtNaZpipzzurbWGn3f744RE+SP6Loucs5RSonz+bxulW7d4VNKUUq5+fuX7dflFKm1rtszOMwhPaW0nhVu3dmXCbJMiS3Lz2qt0Vr7Et+v1mGLdZcut0G3DvmttSil/DiAXzvIj+O4Rres+36wh7ueIMsFvVzEe547TdPVQ/iXO0Lfr5Njee7yGBxqgixhbN3dvx/uPz8/11extiZJzjlSSusESSnZXnHMCXJ5Ee853D8+Pu461F9ODNODQwayvNT7bw7QW2eWyyhaa9FaEwjH2WItF+3yRuGyxbr1EuzlFmvPxEkpxcvLi/99jhHI1kdOIiLO5/PmBX9tXWtt3WrB/26CdF0XKaXo+37zs1hb65Y3GW2b+K90bc9rqOCQDggEBAICAYGAQEAgIBAQCAgEEAgIBAQCAgGBgEBAICAQEAgIBBAICAQEAgIBgYBAQCAgEBAICAQQCAgEBAICAYGAQEAgIBAQCCAQEAgIBAQCAgGBgEBAICAQEAggEBAICAQEAgIBgYBAQCAgEEAgIBAQCAgEBAICAYGAQEAgIBBAICAQEAgIBAQCAgGBgEBAIIBAQCAgEBAICATuSO9P8Hd5fX29+njOOXLO0fd9pJR2reu6LkopUUqJrus2n386neJ0On35ea01Pj4+1u+fn59NEO7XNE0xDEO8vb3FNE271rTWYhiGGIbhl8+rtf54bBxHE4T7tdyxW2sxz3PM8xzDMERrLd7f3+Pp6enqJFnWzfMc4ziuXw8PD5uTqdYa0zRFznldW2uNvu93x2iC8Ed0XRc55yilxPl8XrdKt+7wKaUopdz8/cv263KK1FrX7ZlDOoeRUlrPCrfu7MsEWabEluVntdZorX2J71frbLG4S5fboFuH/NZalFJ+HMCvHeTHcVyjW9Z9P9ibIBxiy7VcxHueO03T1UP4l7tw36+TY3nu8pgJwqEsYWzd3b8f7j8/P9dXsbYmSc45UkrrBEkpHWJ7ZYLww+VFvOdw//j4uOtQfzkxjjI9BMKPg/cyDX73Dr91ZrmMorUWrbVDBWKLZUsVrbX1jcJli3XrJdjLLdaeiZNSipeXl8P9fQTyl9r6yElExPl83rzgr61rra1brf8bgZgg0XVdpJSi7/vNz2JtrVveZDzStul3dG3P63nwl3JIB4GAQEAgIBAQCAgEBAICAYEAAgGBgEBAICAQEAgIBAQCAgGBAAIBgYBAQCAgEBAICAQEAgIBBAICAYGAQEAgIBAQCAgEBAICAQQCAgGBgEBAICAQEAgIBAQCCARu+gd8fc/1sK1+iAAAAABJRU5ErkJggg==) repeat;
         font-family: sans-serif;
     }
     .bk-logo {
         display:none !important;
     }
-    /* this is bad, but I can't find what makes plots off-set by 1 pixel */
     video {
-        margin-left: 1px;
-        padding: 10px;
+{#        The 120 is the width of a gauge#}
+        margin-left: 120px;
+        padding: 10px 0 10px 0;
+        background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAKCAYAAABi8KSDAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wgFFSMksFVNggAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAADnSURBVBjTjc4xqsJAFIXh/84kBtKYdEHQtWQBWU125xasbCxTBgSLgCCOMsmxMfN4vOad5sLlK34zM/HPZU3TEGPk+XwSQmCeZwDMjCzLKMuSoihwzpH1fc/7/eZ8PnM8Hrnf75gZzjl2ux1d17Hf7/Heg747nU5qmkbfLOV5rq7rNE3TSuTWns1mQ1EUmFnKqOuaGGNqTlhSQutdf3+w9x5Jv4AknHM/OMZICIHL5cLj8Uh4WRaGYeB6vRJjZJ5nrG1bvV4vbrcb4zgSQkgZ2+2Ww+FAVVV47zFAqfXbu36FMAwhkPgA0K58ivEV69oAAAAASUVORK5CYII=) repeat;
+
     }
-    #aftervideo {
-        width: 640px;
-        height: 10px;
-    }
-    video, #aftervideo {
-        background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAKCAYAAABi8KSDAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wgFFSMksFVNggAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAADnSURBVBjTjc4xqsJAFIXh/84kBtKYdEHQtWQBWU125xasbCxTBgSLgCCOMsmxMfN4vOad5sLlK34zM/HPZU3TEGPk+XwSQmCeZwDMjCzLKMuSoihwzpH1fc/7/eZ8PnM8Hrnf75gZzjl2ux1d17Hf7/Heg747nU5qmkbfLOV5rq7rNE3TSuTWns1mQ1EUmFnKqOuaGGNqTlhSQutdf3+w9x5Jv4AknHM/OMZICIHL5cLj8Uh4WRaGYeB6vRJjZJ5nrG1bvV4vbrcb4zgSQkgZ2+2Ww+FAVVV47zFAqfXbu36FMAwhkPgA0K58ivEV69oAAAAASUVORK5CYII=)
-            repeat-x;
-    }
-    .bk-plot-wrapper table:first-child {
+    .bk-plot-canvas-wrapper {
         border: 1px solid lightgray;
     }
     .bk-plot-wrapper {
@@ -29,24 +27,22 @@
     .color_square {
         display: inline-block;
         padding: 2px 10px 2px 10px;
-{#        margin: 5px;#}
-{#        border-radius: 2px;#}
-{#        border: 1px solid white;#}
-        color: white;
-        
+{#        color: white;#}
         font-weight: 900;
-{#        min-width: 20px;#}
+        border: 1px solid gray;
+        border-radius: 5px;
+        min-width: 100px;
+    }
+    .grouper {
+        border: 1px solid gray;
+        border-radius: 5px;
 
     }
     label, input[type=checkbox] {
         cursor: pointer;
     }
     .legend {
-        // border: 1px solid white;
-        padding: 10px;
         color: gray;
-        margin-top: 5px;
-        vertical-align: middle;
     }
     .legend td {
         padding-left: 10px;
@@ -56,23 +52,16 @@
     table {
         border-collapse: collapse;
     }
-    .bk-plot-wrapper > table {
-        display: inline-block;
-        vertical-align: top;
-    }
-    .bk-plot-left {
-        display: none;
-    }
     .toggler {
         margin-left: 15px !important;
     }
-    #timer {
-        color: white;
-        margin-left: 10px;
-        font-family: monospace;
-        font-size: 40px;
-        vertical-align: top;
-    }
+{#    #timer {#}
+{#        color: white;#}
+{#        margin-left: 10px;#}
+{#        font-family: monospace;#}
+{#        font-size: 40px;#}
+{#        vertical-align: top;#}
+{#    }#}
     #logo {
         position: absolute;
         right: 10px;

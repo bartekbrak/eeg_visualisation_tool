@@ -3,9 +3,10 @@ __pycache__
 *.egg-info
 .ipynb_checkpoints
 .idea
-dist
+/dist
 .~*
 .python-version
 *.xlsx
 *.xls
 *.mp4
+evt/static/gauge.js/README.md

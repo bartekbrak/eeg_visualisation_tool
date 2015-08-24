@@ -1,14 +1,15 @@
 import itertools
 from operator import itemgetter
-import random
 from numpy import mean
 from evt.constants import data_column_name
+
 
 def to_tuple(what):
     if isinstance(what, (basestring, int, float)):
         return what,
     else:
         return what
+
 
 def average_yaxis_by_properties(column_names, rows):
     """
@@ -78,7 +79,6 @@ distinct_colours = itertools.cycle([
     '#bfe673',
 ])
 
+
 def get_random_colour():
     return distinct_colours.next()
-    # r = lambda: random.randint(0, 196)
-    # return '#%02X%02X%02X' % (r(), r(), r())

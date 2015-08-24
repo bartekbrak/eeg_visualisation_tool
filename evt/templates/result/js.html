@@ -3,12 +3,14 @@
 - I try not to use jinja values inside JS calls, extracting them to variables first,
 - in general flat is better than nested, extract what you can before you use it
 #}
+<script>{{ get_resource_as_string('static/gauge.js/dist/gauge.js') }}</script>
 <script>
 
 var evt = {}; // namespace
 document.addEventListener('DOMContentLoaded', function() {
     // shortcuts
     var CDS = Bokeh.Collections('ColumnDataSource');
+    $ = Bokeh.$;
     evt = {
         video: document.querySelector('video'),
         hover_position: 0,
@@ -22,9 +24,16 @@ document.addEventListener('DOMContentLoaded', function() {
         lines: {},
         // grouper togglers relations
         groupers: {},
+        // HACK
+        no_of_plots: $('.bk-plot-wrapper').length,
+
         // functions
         progress_bar_loop: function () {
-            if (! evt.video.paused) evt.update_progress_bar()
+            if (! evt.video.paused) {
+                evt.update_progress_bar();
+                evt.move_gauges();
+{#                $("#timer").html(evt.fromSeconds(evt.video.currentTime));#}
+            }
             setTimeout(evt.progress_bar_loop, evt.update_resolution);
         },
         update_progress_bar: function () {
@@ -32,15 +41,10 @@ document.addEventListener('DOMContentLoaded', function() {
             evt.progress_bar.set('data', {
                 x: [evt.progress, evt.progress],
                 y: evt.line_y
-            });  
-                // Bokeh.$("#timer").html(evt.fromSeconds(evt.video.currentTime));
-                // evt.cur_index = parseInt((evt.video.currentTime / evt.video.duration) * y_series.length);
-                // cur_value = y_series[evt.cur_index +1]
-                // in_p = parseInt((cur_value - 0.560) / (1.127 - 0.560) * 100)
-                //gauge.set(in_p);                      
+            });
         },
         line_toggle: function (input) {
-            var id = Bokeh.$(input).data('id');
+            var id = $(input).data('id');
             var line = evt.lines[id];
             if (input.checked)
                 line.cds.set('data', line.cds_orig_data);
@@ -63,15 +67,38 @@ document.addEventListener('DOMContentLoaded', function() {
             var ms = ('' + (seconds % 1).toFixed(3)).slice(2, 5);
             if (isNaN(ms)) ms = '000';
             return m + ':' + s + ':' + ms
+        },
+        gauges: {},
+        move_gauges: function () {
+            for (var i=0; i < evt.no_of_plots; i++) {
+                var gauge = evt.gauges[i];
+                var value = gauge['continuum'][evt.progress];
+                if (value !== undefined) gauge['gauge'].set(value);
+            }
         }
     };
 
-    Bokeh.$('.bk-plot-wrapper').each(function(index) {
-        // Append legends to plots
-        var legend = '#legend' + index;
-        var plot_wrapper = '.bk-plot-wrapper:eq(' + index + ')';
-        Bokeh.$(legend).appendTo(plot_wrapper);
+    $('.bk-plot-wrapper').each(function(index) {
+        // Append legends to plots, create gauges
+        var gauge = $('#gauge' + index).get(0);
+        evt.gauges[index] = {
+            'gauge': new Gauge(gauge)
+        };
+        $('#legend' + index).appendTo($('.bk-plot-right:eq(' + index + ')'));
+        $(gauge).appendTo('.bk-plot-left:eq(' + index + ')');
     });
+    {% for total in totals %}
+        var gauge = evt.gauges[{{ loop.index0 }}];
+        gauge['mean'] = {{ total.mean }};
+        gauge['continuum'] = {{ total.continuum }};
+        gauge['gauge'].setOptions({
+            threshold: {{ total.mean }},
+            minValue : {{ total.min }},
+            maxValue : {{ total.max }}
+        });
+        gauge['gauge'].set({{ total.mean }});
+    {% endfor %}
+
 
 
     {% for line_groups in line_groups_per_plot %}
@@ -92,24 +119,24 @@ document.addEventListener('DOMContentLoaded', function() {
     {% endfor %}
 
     // Toggler is an input connected with one line, grouper groups togglers
-    Bokeh.$('input.grouper').each(function(index) {
+    $('input.grouper').each(function(index) {
         // Store grouper-toggler relation for later use 
-        var group_name = Bokeh.$(this).data('group-name');
+        var group_name = $(this).data('group-name');
         var togglers = 'input.toggler[data-group-name="' + group_name + '"]'
-        evt.groupers[group_name] = Bokeh.$(togglers);
+        evt.groupers[group_name] = $(togglers);
     });     
-    Bokeh.$('input.toggler').change(function() {evt.line_toggle(this); });
-    Bokeh.$('input.grouper').change(function() {
-        var group_name = Bokeh.$(this).data('group-name');
+    $('input.toggler').change(function() {evt.line_toggle(this); });
+    $('input.grouper').change(function() {
+        var group_name = $(this).data('group-name');
         evt.groupers[group_name].prop('checked', this.checked);
         evt.groupers[group_name].trigger('change');
     });  
     // Now make all lines visible in accordance to their input states
-    Bokeh.$('input').trigger('change');
+    $('input').trigger('change');
 
 
     // Mouse and keyobard events
-    Bokeh.$('.bk-canvas-events').on('dblclick', evt.rewind_to_hover);
+    $('.bk-canvas-events').on('dblclick', evt.rewind_to_hover);
     window.addEventListener('keydown', function (event) {
         if (event.keyCode == 32) {
             evt.toggle_video();
@@ -119,13 +146,12 @@ document.addEventListener('DOMContentLoaded', function() {
     evt.video.addEventListener('mousedown', evt.toggle_video);
     // prevent leaving focus on the checkbox, we use space to toggle video 
     // which would also toggle the checkbox 
-    Bokeh.$('input[type=checkbox]').mousedown(function (event) {
+    $('input[type=checkbox]').mousedown(function (event) {
         event.preventDefault();
     });    
 
     // Start the main progress bar loop
     evt.progress_bar_loop();
     
-
 });
 </script>

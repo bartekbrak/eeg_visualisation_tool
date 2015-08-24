@@ -2,38 +2,44 @@
     <video width=640 controls>
         <source type="video/mp4" src="data:video/mp4;base64,{{video_data}}">
     </video>
-    <div id="aftervideo"></div><span id="timer">timer</span>
+{#    <span id="timer">timer</span>#}
     {{ plot_div|indent(8) }}
 
 <div id="legend_group">
 {% for line_groups in line_groups_per_plot %}
     <table class="legend" id="legend{{ loop.index0 }}"><tr>
     {% set outer_loop = loop %}
+
+    {# totals #}
+    <td><label>
+        {% set total = totals[outer_loop.index0] %}
+        <input
+                type="checkbox"
+                class="toggler"
+                checked
+                data-id="{{ total.source._id }}">
+        <div class="color_square" style="color: {{ total.color }}">total</div>
+    </label></td>
     {% for group_name, lines in line_groups.iteritems() %}
         <td><label>
         <input type="checkbox" class="grouper" data-group-name="{{ outer_loop.index0 }}-{{ group_name }}">
-            {{ group_name }}
+            <div class="color_square">{{ group_name }}</div>
         </label>
         <br/>
         {% for line in lines %}
             <label>
             <input type="checkbox" class="toggler" data-id="{{ line.source._id }}" data-group-name="{{ outer_loop.index0 }}-{{ group_name }}">
             {% for filter, value in line.description.items() %} 
-                <div class="color_square" style="background-color: {{ line.color }}">{{ value }}</div> 
+                <div class="color_square" style="color: {{ line.color }}">{{ value }}</div>
             {% endfor %}
             </label><br/>
         {% endfor %}
         </td>
     {% endfor %}
-    <td><label>
-        <input
-                type="checkbox"
-                class="toggler"
-                checked
-                data-id="{{ totals[outer_loop.index0].source._id }}">
-        <div class="color_square" style="background-color: red">total</div>
-    </label></td>
-    </tr></table>
+    </tr>
+    <td><div id="valency"></div>średnia walencyjna</td>
+    </table>
+    <canvas width=120 height=70 class="gauge" id="gauge{{ outer_loop.index0 }}"></canvas>
 {% endfor %}
 </div>
 
@@ -44,7 +50,5 @@
     data: {{ date }}<br>
     próba: {{ sample_size }}
     <br>
-    <div id="valency"></div>średnia walencyjna
 </div>
-
 </body>

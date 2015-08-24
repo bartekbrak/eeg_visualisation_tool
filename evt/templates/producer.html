@@ -32,31 +32,23 @@
     .block {
         display: block;
     }
+    #traceback {
+        white-space: pre;
+        font-family: monospace;
+    }
 </style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
 <script src="http://malsup.github.com/jquery.form.js"></script>
 <script type="text/javascript" src="{{ filesaver }}"></script>
 <script>
 $(document).ready(function() {
-    evt = {
-        get_end_user_file: function() {
-            $.ajax({
-                type: 'POST',
-                url: "{{ get_end_user_file_url }}",
-                data: JSON.stringify(document.getElementById('form')),
-                contentType: 'application/json;charset=UTF-8',
-                success: function (result) {
-                    alert(result);
-                }
-            })
-        }
-    };
     var bar = $('.bar');
     var percent = $('.percent');
     var status = $('#status');
     $('#form').ajaxForm({
         dataType: 'json',
         beforeSend: function() {
+            $('#submit_btn').prop('disabled', true).prop('value', 'Proszę czekać.');
             status.empty();
             var percentVal = '0%';
             bar.width(percentVal);
@@ -73,11 +65,21 @@ $(document).ready(function() {
             percent.html(percentVal);
         },
         complete: function(xhr) {
+            $('#submit_btn').prop('disabled', false).prop('value', 'Stwórz następny');
             console.log(xhr);
             if (xhr.responseJSON.status == 'ok') {
                 var blob = new Blob([xhr.responseJSON.content], {type: "text/html;charset=utf-8"});
+                $('#traceback').css('color', 'gray').html(
+                    'Log serwera:\n' + xhr.responseJSON.traceback);
                 saveAs(blob, "evt.html");
-            } else alert('something went wrong');
+            } else {
+                $('#traceback').css('color', 'red').html(xhr.responseJSON.traceback);
+                text = 'Something went wrong.\n' +
+                        'Please send the text in red displayed\n' +
+                        'at the bottom of the page along with\n' +
+                        'data to bartek.rychlicki@gmail.com';
+                alert(text);
+            }
             event.preventDefault();
         }
     });
@@ -131,6 +133,7 @@ $(document).ready(function() {
     <input class="center" id="submit_btn" type="submit" value="Stwórz">
     <br>
     <div class="progress center"><div class="bar"></div><div class="percent center">0%</div></div>
+    <div id="traceback"></div>
 </form>
 </body>
 </html>

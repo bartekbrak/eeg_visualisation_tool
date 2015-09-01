@@ -36,6 +36,11 @@
         white-space: pre;
         font-family: monospace;
     }
+    #pkg_version {
+        color: rgba(200, 200, 200, 0.1);
+        font-family: monospace;
+        font-size: 10px;
+    }
 </style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
 <script src="http://malsup.github.com/jquery.form.js"></script>
@@ -91,7 +96,7 @@ $(document).ready(function() {
 </head>
 <body class="center">
 <h1>
-    Formularz producenta.
+    Formularz producenta. <span id="pkg_version">wersja {{ pkg_version }}</span>
 </h1>
 <p>
     Służy do tworzenia plików z wykresami z plików Excela i filmu. Użytkowni
@@ -113,8 +118,8 @@ $(document).ready(function() {
     <li>wszystkie kolumny muszą być nazwane</li>
     <li>Nie dodawaj zbędnych kolumn, kolumny albo odpowiadają za filtry albo są to kolumny z danymi (asN)</li>
     <li>Skasuj nieużywane arkusze</li>
-
 </ul>
+
 <form id="form" action="{{ get_end_user_file_url }}" method="POST" enctype="multipart/form-data">
     <table>
         <tr><td class="header" colspan="3">Wymagane pliki</td></tr>

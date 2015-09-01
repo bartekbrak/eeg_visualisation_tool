@@ -16,6 +16,7 @@ from ffprobe import FFProbe
 
 from flask import Flask, request, url_for, jsonify
 import numpy
+import pkg_resources
 
 from evt import template_env, memory
 from evt.data_getter import get_from_excel, get_mean, grouper, continuous_array
@@ -40,7 +41,8 @@ def server():
     form = ServerForm()
     kwargs = {
         'get_end_user_file_url': url_for('.get_end_user_file'),
-        'filesaver': url_for('static', filename='FileSaver.min.js')
+        'filesaver': url_for('static', filename='FileSaver.min.js'),
+        'pkg_version': pkg_resources.get_distribution('evt').version
     }
     return template_env.get_template('producer.html').render(form=form,
                                                              **kwargs)

@@ -74,8 +74,10 @@ $(document).ready(function() {
                 saveAs(blob, "evt.html");
             } else {
                 $('#traceback').css('color', 'red').html(xhr.responseJSON.traceback);
-                text = 'Something went wrong.\n' +
-                        'Please send the text in red displayed\n' +
+                message = xhr.responseJSON.message;
+                text = message + '\n\nSomething went wrong.\n' +
+                        'If the message above does not help\n' +
+                        'please send the text in red displayed\n' +
                         'at the bottom of the page along with\n' +
                         'data to bartek.rychlicki@gmail.com';
                 alert(text);

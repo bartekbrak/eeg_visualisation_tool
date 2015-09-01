@@ -1,1 +1,1 @@
-data_column_name = u'as'
+numerical_data_column_name = u'as'

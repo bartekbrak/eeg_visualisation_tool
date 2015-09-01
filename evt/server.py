@@ -1,7 +1,9 @@
+from argparse import ArgumentParser
 from base64 import b64encode
 from itertools import chain
 import itertools
 from operator import attrgetter
+import os
 from tempfile import NamedTemporaryFile
 import traceback
 
@@ -72,7 +74,7 @@ def get_end_user_file():
         logger += 'sheets: %s' % [
             [_['filter_column_names'], _['title']]
             for _ in sheets
-        ]
+            ]
         tp = []
         # will truncate sheets if no_of_plots is smaller
         for no_of_plots, sheet in zip(plots, sheets):
@@ -90,10 +92,11 @@ def get_end_user_file():
             **template_args
         )
         return jsonify(status='ok', content=content, traceback=logger)
-    except Exception:
+    except Exception as e:
         return jsonify(
             status='error',
-            traceback=logger + traceback.format_exc()
+            traceback=logger + traceback.format_exc(),
+            message=e.message
         )
 
 
@@ -158,13 +161,39 @@ def write_file(html, out_filename):
         textfile.write(html)
 
 
+def parse_args():
+    here = os.path.dirname(os.path.realpath(__file__))
+    parser = ArgumentParser()
+    parser.add_argument(
+        '-d',
+        '--data',
+        default=os.path.join(here, '..', 'data/data.xlsx')
+    )
+    parser.add_argument(
+        '-v',
+        '--video',
+        default=os.path.join(here, '..', 'data/video.mp4')
+    )
+    parser.add_argument(
+        '-c',
+        '--clean',
+        action='store_true'
+    )
+    return parser.parse_args()
+
+
 def standalone():
-    video_content = open('tymbark.mp4').read()
+    args = parse_args()
+    if args.clean:
+        print 'wiping cache'
+        memory.clear()
+
+    video_content = open(args.video).read()
     video_encoded = b64encode(video_content)
     video_len, all_video_lens = get_video_len(video_content)
     print 'duration: %s out of %s' % (video_len, all_video_lens)
     plots = [1, 1]
-    sheets = get_from_excel('asymetria2.xlsx')
+    sheets = get_from_excel(args.data)
 
     tp = []
     # will truncate sheets if no_of_plots is smaller
@@ -284,3 +313,7 @@ def draw_secondary_elements(f, valency, total_cds, progress_bar, x_axis_len,
         alpha=0.1
 
     )
+
+
+if __name__ == '__main__':
+    standalone()

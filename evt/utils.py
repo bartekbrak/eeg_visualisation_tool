@@ -1,7 +1,9 @@
 import itertools
 from operator import itemgetter
+
 from numpy import mean
-from evt.constants import data_column_name
+
+from evt.constants import numerical_data_column_name
 
 
 def to_tuple(what):
@@ -28,7 +30,8 @@ def average_yaxis_by_properties(column_names, rows):
     for column_values, grouped_data_rows in grouper:
         description = dict(zip(column_names, to_tuple(column_values)))
         grouped = mean(
-            [data_row[data_column_name] for data_row in grouped_data_rows],
+            [data_row[numerical_data_column_name] for data_row in
+             grouped_data_rows],
             axis=0
         )
         yield description, grouped, column_names
@@ -41,8 +44,9 @@ def average_yaxis_by_properties_separate(column_names, rows):
     Note that we want to pass the tuple.
     """
     for column_name in column_names:
-        for _ in average_yaxis_by_properties((column_name, ), rows):
+        for _ in average_yaxis_by_properties((column_name,), rows):
             yield _
+
 
 distinct_colours = itertools.cycle([
     '#ff0000',

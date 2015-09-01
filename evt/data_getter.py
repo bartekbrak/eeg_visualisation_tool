@@ -1,10 +1,13 @@
 from __future__ import unicode_literals
 from collections import defaultdict
+from zipfile import BadZipfile
+
 from bokeh.models import ColumnDataSource
 import numpy
+
 from openpyxl import load_workbook
-from evt import memory
-from evt.constants import data_column_name
+
+from evt.constants import numerical_data_column_name
 from evt.models import Line
 from evt.utils import get_random_colour
 
@@ -12,7 +15,12 @@ from evt.utils import get_random_colour
 # @memory.cache
 def get_from_excel(filename):
     print 'running get_from_excel', filename
-    wb = load_workbook(filename, read_only=True, data_only=True)
+    try:
+        wb = load_workbook(filename, read_only=True, data_only=True)
+    except BadZipfile:
+        raise Exception(
+            'Bad Data File. The only accepted format is '
+            'Microsoft Excel 2007/2010/2013 XML (.xlsx)')
     sheets = [sheet for sheet in wb.worksheets if bool(sheet.columns[0])]
     ret = []
     for sheet in sheets:
@@ -30,16 +38,19 @@ def get_from_excel(filename):
 def get_filter_column_names(first_row):
     return [
         cell.value for cell in first_row
-        if cell.value and not cell.value.startswith(data_column_name)
-    ]
+        if cell.value and not cell.value.startswith(numerical_data_column_name)
+        ]
 
 
 def row_as_dict(row, filter_column_names):
-    values = [column.value for column in row if column.value is not None]
+    # perhaps add "if column.value is not None"
+    values = [column.value for column in row]
+    assert None not in values, 'Empty cells present in data'
     result = {}
-    for name in filter_column_names:
-        result[name] = values.pop(0)
-    result[data_column_name] = values
+    for named_value in filter_column_names:
+        result[named_value] = values.pop(0)
+    numerical_values = values
+    result[numerical_data_column_name] = numerical_values
     return result
 
 
@@ -49,7 +60,7 @@ def get_video_data(filename):
 
 
 def get_mean(data, axis=None):
-    return numpy.mean([row[data_column_name] for row in data], axis)
+    return numpy.mean([row[numerical_data_column_name] for row in data], axis)
 
 
 def grouper(data, grouped_by, sampling_rate, grouper_f):

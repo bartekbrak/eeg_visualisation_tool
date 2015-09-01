@@ -10,3 +10,4 @@ __pycache__
 *.xls
 *.mp4
 evt/static/gauge.js/README.md
+/tmp

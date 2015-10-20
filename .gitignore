@@ -12,3 +12,5 @@ __pycache__
 evt/static/gauge.js/README.md
 /tmp
 /data
+/.cache
+/.coverage

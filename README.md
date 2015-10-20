@@ -12,7 +12,9 @@
 
 * Dependencies
   ffprobe (part of ffmpeg), ppa: https://launchpad.net/~mc3man/+archive/ubuntu/trusty-media
-  ```
-  sudo add-apt-repository ppa:mc3man/trusty-media
-  sudo apt-get update && sudo apt-get install ffmpeg
-  ```
+
+        sudo add-apt-repository ppa:mc3man/trusty-media
+        sudo apt-get update && sudo apt-get install ffmpeg
+
+* Optional dependencies:
+  `apt-get install  inotify-tools`

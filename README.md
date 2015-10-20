@@ -9,3 +9,10 @@
   while inotifywait -e close_write,moved_to,create -r evt; do evt_standalone; done
   cd evt/static/gauge.js/dist
   while inotifywait -e close_write,moved_to,create -r .; do coffee -c gauge.coffee; done
+
+* Dependencies
+  ffprobe (part of ffmpeg), ppa: https://launchpad.net/~mc3man/+archive/ubuntu/trusty-media
+  ```
+  sudo add-apt-repository ppa:mc3man/trusty-media
+  sudo apt-get update && sudo apt-get install ffmpeg
+  ```

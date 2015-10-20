@@ -213,7 +213,9 @@ def standalone():
         template=template_env.get_template('result/result.html'),
         **template_args
     )
-    write_file(content, 'out.html')
+    outfile_filename = 'data/out.html'
+    write_file(content, outfile_filename)
+    print(outfile_filename + ' written')
 
 
 def _validate_data_length(rate, sheets, video_len):

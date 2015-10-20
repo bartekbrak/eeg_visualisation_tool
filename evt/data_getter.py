@@ -45,7 +45,7 @@ def get_filter_column_names(first_row):
 def row_as_dict(row, filter_column_names):
     # perhaps add "if column.value is not None"
     values = [column.value for column in row]
-    assert None not in values, 'Empty cells present in data'
+    assert None not in values, 'Empty cells present in data: %s' % values
     result = {}
     for named_value in filter_column_names:
         result[named_value] = values.pop(0)

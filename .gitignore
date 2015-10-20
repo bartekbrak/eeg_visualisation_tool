@@ -11,3 +11,4 @@ __pycache__
 *.mp4
 evt/static/gauge.js/README.md
 /tmp
+/data

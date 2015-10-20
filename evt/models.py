@@ -11,4 +11,3 @@ class Line(object):
         self.max = max
         self.mean = mean
         self.continuum = continuum
-

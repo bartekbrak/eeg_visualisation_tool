@@ -1,28 +1,28 @@
+import itertools
+import os
+import traceback
 from argparse import ArgumentParser
 from base64 import b64encode
 from itertools import chain
-import itertools
 from operator import attrgetter
-import os
 from tempfile import NamedTemporaryFile
-import traceback
 
+import numpy
+import pkg_resources
 from bokeh.embed import file_html
 from bokeh.io import vform
-from bokeh.models import ColumnDataSource, HoverTool, Callback, Range1d
+from bokeh.models import Callback, ColumnDataSource, HoverTool, Range1d
 from bokeh.plotting import figure
 from bokeh.resources import Resources
 from ffprobe import FFProbe
+from flask import Flask, jsonify, request, url_for
+from IPython import embed
 
-from flask import Flask, request, url_for, jsonify
-import numpy
-import pkg_resources
-
-from evt import template_env, memory
-from evt.data_getter import get_from_excel, get_mean, grouper, continuous_array
+from evt import memory, template_env
+from evt.data_getter import continuous_array, get_from_excel, get_mean, grouper
 from evt.forms import ServerForm
 from evt.models import Line
-from evt.utils import average_yaxis_by_properties_separate
+from evt.utils import average_yaxis_by_properties_separate, distinct_colors
 
 app = Flask(__name__, static_url_path='/evt/templates')
 
@@ -42,6 +42,7 @@ def server():
     kwargs = {
         'get_end_user_file_url': url_for('.get_end_user_file'),
         'filesaver': url_for('static', filename='FileSaver.min.js'),
+        'color_picker': url_for('static', filename='jqColorPicker.min.js'),
         'pkg_version': pkg_resources.get_distribution('evt').version
     }
     return template_env.get_template('producer.html').render(form=form,
@@ -84,8 +85,11 @@ def get_end_user_file():
         _validate_data_length(form.data['sampling_rate'], sheets, video_len)
 
         layout, template_args = the_meat(
-            tp, form.data['sampling_rate'], video_encoded,
-            form.data['y_margin']
+            tp=tp,
+            sampling_rate=form.data['sampling_rate'],
+            video_data=video_encoded,
+            y_margin=form.data['y_margin'],
+            colors=form.data['colors']
         )
         template_args.update(**form.data)
         content = render_template(
@@ -227,7 +231,7 @@ def _validate_data_length(rate, sheets, video_len):
         assert data_covers < video_len + rate, assert_complaint
 
 
-def the_meat(tp, sampling_rate, video_data, y_margin):
+def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
     line_groups_per_plot = []
     totals = []
     figures = []
@@ -244,7 +248,8 @@ def the_meat(tp, sampling_rate, video_data, y_margin):
                     g['data'],
                     g['filter_column_names'],
                     sampling_rate,
-                    average_yaxis_by_properties_separate
+                    average_yaxis_by_properties_separate,
+                    itertools.cycle(colors)
                 )
                 line_groups_per_plot.append(line_groups)
                 lines = list(itertools.chain(*line_groups.values()))

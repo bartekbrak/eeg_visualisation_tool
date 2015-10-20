@@ -1,6 +1,15 @@
 # coding=utf-8
 from __future__ import unicode_literals
-from wtforms import Form, FileField, IntegerField, FloatField, StringField
+
+from wtforms import (
+    FieldList,
+    FileField,
+    FloatField,
+    Form,
+    IntegerField,
+    StringField
+)
+from evt.utils import distinct_colors
 
 
 class ServerForm(Form):
@@ -44,4 +53,9 @@ class ServerForm(Form):
         'Nazwa zakładki',
         default='EEG Dom Badawczy Maison',
         description='Nazwa zakładki w przeglądarce. pliku wynikowego.'
+    )
+    colors = FieldList(
+        label='Paleta',
+        unbound_field=StringField(),
+        default=distinct_colors[:20]
     )

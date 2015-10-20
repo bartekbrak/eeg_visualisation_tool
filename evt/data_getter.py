@@ -1,15 +1,15 @@
 from __future__ import unicode_literals
+
 from collections import defaultdict
 from zipfile import BadZipfile
 
-from bokeh.models import ColumnDataSource
 import numpy
-
+from bokeh.models import ColumnDataSource
 from openpyxl import load_workbook
 
+# from evt import memory
 from evt.constants import numerical_data_column_name
 from evt.models import Line
-from evt.utils import get_random_colour
 
 
 # @memory.cache
@@ -63,14 +63,14 @@ def get_mean(data, axis=None):
     return numpy.mean([row[numerical_data_column_name] for row in data], axis)
 
 
-def grouper(data, grouped_by, sampling_rate, grouper_f):
+def grouper(data, grouped_by, sampling_rate, grouper_f, color_cycle):
     line_groups = defaultdict(list)
     for description, y_series, filter_names in grouper_f(grouped_by, data):
         x_range = range(0, len(y_series) * sampling_rate, sampling_rate)
         source = ColumnDataSource(data=dict(x=x_range, y=y_series))
         key = ', '.join(filter_names)
         line_groups[key].append(
-            Line(y_series, source, description, get_random_colour())
+            Line(y_series, source, description, color_cycle.next())
         )
     return line_groups
 

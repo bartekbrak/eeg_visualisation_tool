@@ -41,11 +41,42 @@
         font-family: monospace;
         font-size: 10px;
     }
+    .button {
+        font-size: 50px;
+        font-weight: 900;
+        display: inline-block;
+        cursor: pointer;
+        text-align: center;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;        
+    }
+    #add_another_button {
+        color: green;
+    }
+    #rm_button {
+        color: red;
+    }    
+    .color {
+        border: none;
+        padding: 4px;
+        margin: 1px;
+        width: 100px;
+        text-align: center;
+        border-radius: 10px;
+        cursor: pointer;
+        outline: none;
+    }
 </style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
 <script src="http://malsup.github.com/jquery.form.js"></script>
 <script type="text/javascript" src="{{ filesaver }}"></script>
+<script type="text/javascript" src="{{ color_picker }}"></script>
 <script>
+
 $(document).ready(function() {
     var bar = $('.bar');
     var percent = $('.percent');
@@ -90,6 +121,36 @@ $(document).ready(function() {
             event.preventDefault();
         }
     });
+    var clone_field_list = function(selector) {
+        var new_element = $(selector).clone(true);
+        var elem_name = new_element[0].name;
+        name_re = /(.*)-(\d{1,2})/
+        var match = name_re.exec(elem_name);
+        var bare_name = match[1];
+        var new_id = parseInt(match[2]) + 1;
+        var new_name = bare_name + '-' + new_id;
+        new_element.attr({'name': new_name, 'id': new_name})
+        $(selector).after(new_element);
+    };
+    $('#add_another_button').click(function () {
+        clone_field_list('.color:last');
+    });
+    $('#rm_button').click(function() {
+       $('.color:last').remove(); 
+    });
+    $('.color').colorPicker({
+    renderCallback: function($elm, toggled) {
+        var colors = this.color.colors;
+
+        $('.cp-disp').css({
+            backgroundColor: '#' + colors.HEX,
+            color: colors.RGBLuminance > 0.22 ? '#222' : '#ddd'
+        }).text('#' + colors.HEX);
+        $elm.attr('value', '#' + colors.HEX);
+    },
+    opacity: false
+    });
+
 
 });
     </script>
@@ -130,6 +191,15 @@ $(document).ready(function() {
         {{ render_field(form.sampling_rate, type='number', min=0, max=10000) }}
         {{ render_field(form.y_margin, type='number', step='0.1', min=0, max=10) }}
         {{ render_field(form.plot_title) }}
+        <tr><td>
+            {{ form.colors.label }}
+        </td><td colspan="2">
+            {% for color in form.colors %}{{ color(class='color no-alpha') }}{% endfor %}
+            <br>
+            <div class="button" id="add_another_button">+</div>
+            <div class="button" id="rm_button">–</div>
+        </td></tr>
+
         <tr><td class="header" colspan="3">Opis klienta</td></tr>
         {{ render_field(form.client_name) }}
         {{ render_field(form.research_name) }}

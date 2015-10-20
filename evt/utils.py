@@ -48,41 +48,16 @@ def average_yaxis_by_properties_separate(column_names, rows):
             yield _
 
 
-distinct_colours = itertools.cycle([
-    '#ff0000',
-    '#a66c29',
-    '#39e639',
-    '#266399',
-    '#554359',
-    '#f20000',
-    '#403830',
-    '#00f2c2',
-    '#162859',
-    '#d26cd9',
-    '#330000',
-    '#ffbf40',
-    '#006652',
-    '#00008c',
-    '#66005f',
-    '#994d4d',
-    '#998a4d',
-    '#56736d',
-    '#000073',
-    '#330d2b',
-    '#7f2200',
-    '#ccff00',
-    '#00ccff',
-    '#000066',
-    '#f20081',
-    '#401d10',
-    '#2b330d',
-    '#005266',
-    '#6060bf',
-    '#8c466c',
-    '#d9896c',
-    '#bfe673',
-])
+distinct_colors = [
+    '#FF0000', '#A66C29', '#39E639', '#266399', '#554359', '#F20000',
+    '#403830', '#00F2C2', '#162859', '#D26CD9', '#330000', '#FFBF40',
+    '#006652', '#00008C', '#66005F', '#994D4D', '#998A4D', '#56736D',
+    '#000073', '#330D2B', '#7F2200', '#CCFF00', '#00CCFF', '#000066',
+    '#F20081', '#401D10', '#2B330D', '#005266', '#6060BF', '#8C466C',
+    '#D9896C', '#BFE673'
+]
+cycler = itertools.cycle(distinct_colors)
 
 
 def get_random_colour():
-    return distinct_colours.next()
+    return cycler.next()

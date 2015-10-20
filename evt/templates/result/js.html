@@ -26,14 +26,23 @@ document.addEventListener('DOMContentLoaded', function() {
         groupers: {},
         // HACK
         no_of_plots: $('.bk-plot-wrapper').length,
-
+        // play /pause icon
+        icon: $("#play-icon"),
+        icons: $(".icons"),
+        play_icon: $("#play-icon"),
+        pause_icon: $("#pause-icon"),
+        mouse_on_video: true,
         // functions
         progress_bar_loop: function () {
             if (! evt.video.paused) {
                 evt.update_progress_bar();
                 evt.move_gauges();
 {#                $("#timer").html(evt.fromSeconds(evt.video.currentTime));#}
-            }
+            };
+            if (evt.mouse_on_video) {
+                evt.icons.hide();
+                evt.icon.show();
+            } else evt.icons.hide();
             setTimeout(evt.progress_bar_loop, evt.update_resolution);
         },
         update_progress_bar: function () {
@@ -52,8 +61,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 line.cds.set('data', {});
         },
         toggle_video: function () {
-            if (evt.video.paused) evt.video.play();
-            else evt.video.pause();
+            if (evt.video.paused) {
+                evt.video.play();
+                evt.icon = evt.pause_icon;
+            } else {
+                evt.video.pause()
+                evt.icon = evt.play_icon;
+            };
         },
         rewind_to_hover: function () {
             evt.video.pause();
@@ -143,8 +157,16 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
         }
     });
-    evt.video.addEventListener('mousedown', evt.toggle_video);
-    // prevent leaving focus on the checkbox, we use space to toggle video 
+    // evt.video.addEventListener('mousedown', evt.toggle_video);
+    $('#wideo_wrapper').hover(
+        function() {
+            evt.mouse_on_video = true;
+        },
+        function() {
+            evt.mouse_on_video = false;
+        }
+    ).mousedown(evt.toggle_video);
+    // prevent leaving focus on the checkbox, we use space to toggle video
     // which would also toggle the checkbox 
     $('input[type=checkbox]').mousedown(function (event) {
         event.preventDefault();

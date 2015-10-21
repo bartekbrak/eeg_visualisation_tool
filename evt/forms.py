@@ -9,7 +9,6 @@ from wtforms import (
     IntegerField,
     StringField
 )
-from evt.utils import distinct_colors
 
 
 class ServerForm(Form):
@@ -57,5 +56,4 @@ class ServerForm(Form):
     colors = FieldList(
         label='Paleta',
         unbound_field=StringField(),
-        default=distinct_colors[:20]
     )

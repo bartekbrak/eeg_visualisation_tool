@@ -1,9 +1,11 @@
 import itertools
+import os
+import pickle
 from operator import itemgetter
 
 from numpy import mean
 
-from evt.constants import numerical_data_column_name
+from evt.constants import color_pickle, numerical_data_column_name
 
 
 def to_tuple(what):
@@ -61,3 +63,11 @@ cycler = itertools.cycle(distinct_colors)
 
 def get_random_colour():
     return cycler.next()
+
+
+def get_pickled_colors(filename=color_pickle):
+    if not os.path.isfile(filename):
+        print 'no pickles'
+        return distinct_colors[:20]
+    with open(filename) as f:
+        return pickle.load(f)

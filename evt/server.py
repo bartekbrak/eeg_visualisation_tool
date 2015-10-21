@@ -1,5 +1,6 @@
 import itertools
 import os
+import pickle
 import traceback
 from argparse import ArgumentParser
 from base64 import b64encode
@@ -19,10 +20,15 @@ from flask import Flask, jsonify, request, url_for
 from IPython import embed
 
 from evt import memory, template_env
+from evt.constants import color_pickle
 from evt.data_getter import continuous_array, get_from_excel, get_mean, grouper
 from evt.forms import ServerForm
 from evt.models import Line
-from evt.utils import average_yaxis_by_properties_separate, distinct_colors
+from evt.utils import (
+    average_yaxis_by_properties_separate,
+    distinct_colors,
+    get_pickled_colors
+)
 
 app = Flask(__name__, static_url_path='/evt/templates')
 
@@ -38,7 +44,7 @@ template_env.globals['get_resource_as_string'] = get_resource_as_string
 
 @app.route('/')
 def server():
-    form = ServerForm()
+    form = ServerForm(colors=get_pickled_colors(color_pickle))
     kwargs = {
         'get_end_user_file_url': url_for('.get_end_user_file'),
         'filesaver': url_for('static', filename='FileSaver.min.js'),
@@ -70,6 +76,8 @@ def get_end_user_file():
         logger += 'Video length in bytes: %s\n' % len(video_content)
         video_encoded = b64encode(video_content)
         form = ServerForm(request.form)
+
+        pickle.dump(form.data['colors'], open(color_pickle, 'w'))
         video_len, all_video_lens = get_video_len(video_content)
         logger += 'duration: %s out of %s\n' % (video_len, all_video_lens)
         plots = [int(_) for _ in form.data['no_of_plots'].split(',')]

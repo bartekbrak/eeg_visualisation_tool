@@ -149,7 +149,7 @@ def get_tools():
 def get_figure(x_axis_len, **kwargs):
     f = figure(
         toolbar_location=None,
-        plot_width=640,
+        plot_width=658,
         plot_height=200,
         # FIXME: this really should be 0, causes 0/1 to be displayed on axis
         x_range=Range1d(1, x_axis_len),
@@ -160,7 +160,7 @@ def get_figure(x_axis_len, **kwargs):
     f.xgrid.grid_line_alpha = 0.2
     f.yaxis.minor_tick_line_color = None
     f.yaxis.major_tick_line_color = None
-    f.yaxis.axis_label_text_font_size = '12px'
+    f.xaxis.axis_label_text_font_size = '12px'
     # f.yaxis.major_label_standoff = 20
     f.min_border_left = 60
     f.min_border_right = 10
@@ -279,10 +279,11 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
                 line_groups_per_plot.append({})
 
             f = get_figure(
-                y_axis_label=g['title'],
+                x_axis_label=g['title'],
                 tools=get_tools(),
                 x_axis_len=x_axis_len,
-                y_range=Range1d(y_min, y_max)
+                y_range=Range1d(y_min, y_max),
+
             )
             figures.append(f)
 
@@ -359,7 +360,10 @@ def draw_secondary_elements(f, valency_cds, total_cds, progress_bar, x_axis_len,
         bottom=y_min,
         left=0,
         right=x_axis_len,
-        alpha=0.1
+        alpha=0.3,
+        fill_color='#b19dc6',
+        line_color='#b19dc6',
+        line_width=2
 
     )
 

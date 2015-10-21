@@ -312,7 +312,20 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
         'totals': totals,
         # 'continuals': continuals
     }
+    template_args.update(get_inline_statics())
     return layout, template_args
+
+
+def get_inline_statics(static_path='evt/static/'):
+    static_files = {
+        'video_border_up': 'video_border_up.png',
+        'video_border_back': 'video_border_back.png',
+        'video_border_down': 'video_border_down.png'
+    }
+    return {
+        var: b64encode(open(static_path + filename).read())
+        for var, filename in static_files.items()
+    }
 
 
 def draw_secondary_elements(f, valency, total_cds, progress_bar, x_axis_len,

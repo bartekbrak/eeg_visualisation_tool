@@ -15,3 +15,4 @@ evt/static/gauge.js/README.md
 /.cache
 /.coverage
 colors.pickle
+/build

@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $ = Bokeh.$;
     evt = {
         video: document.querySelector('video'),
+        dragging: null,
         hover_position: 0,
         progress: 0,
         // progress bar line y coordinates, two x values that are always bigger than the plot itself 
@@ -150,7 +151,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // Mouse and keyobard events
-    $('.bk-canvas-events').on('dblclick', evt.rewind_to_hover);
+    $('.bk-canvas-events').dblclick(
+        evt.rewind_to_hover
+    ).mousemove(function(e) {
+        if (evt.dragging) evt.rewind_to_hover()
+    }).mousedown(function (e) {
+        evt.dragging = true;
+        e.preventDefault();
+    }).mouseleave(function(e) { 
+        evt.dragging = false; 
+    }).mouseup(function (e) {
+        evt.dragging = false;
+    });
     window.addEventListener('keydown', function (event) {
         if (event.keyCode == 32) {
             evt.toggle_video();

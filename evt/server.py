@@ -247,6 +247,8 @@ def _validate_data_length(rate, sheets, video_len):
 def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
     line_groups_per_plot = []
     totals = []
+    # valency is misleading, this is just average
+    valencies = []
     figures = []
     progress_bar_y, progress_bar = get_progress_bar()
     # continuals = {}
@@ -254,7 +256,6 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
         x_axis_len = len(g['data'][0]['as']) * sampling_rate + sampling_rate
         for _ in range(g['no_of_plots']):
             lines = []
-            valency = get_mean(g['data'])
             total = get_mean(g['data'], axis=0)
             if g['filter_column_names']:
                 line_groups = grouper(
@@ -286,8 +287,9 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
             figures.append(f)
 
             x_range = range(0, len(total) * sampling_rate, sampling_rate)
-            data = dict(x=x_range, y=total)
-            total_cds = ColumnDataSource(data=data)
+            total_data = dict(x=x_range, y=total)
+            total_cds = ColumnDataSource(data=total_data)
+            valency = get_mean(g['data'])
             total_line = Line(
                 total,
                 total_cds,
@@ -295,11 +297,21 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
                 'red',
                 numpy.min(total),
                 numpy.max(total),
-                valency,
+                0,  # or valency
                 continuous_array(x_range, total)
             )
             totals.append(total_line)
-            draw_secondary_elements(f, valency, total_cds, progress_bar,
+            valency_data = dict(x=[0, x_axis_len], y=[valency, valency])
+            valency_cds = ColumnDataSource(data=valency_data)
+            valency_line = Line(
+                data=valency_data,
+                source=valency_cds,
+                color='orange',
+                mean=valency,
+            )
+            valencies.append(valency_line)
+
+            draw_secondary_elements(f, valency_cds, total_cds, progress_bar,
                                     x_axis_len, y_min)
             if g['filter_column_names']:
                 for line in lines:
@@ -316,6 +328,7 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
         'video_data': video_data,
         'line_groups_per_plot': line_groups_per_plot,
         'totals': totals,
+        'valencies': valencies,
         # 'continuals': continuals
     }
     template_args.update(get_inline_statics())
@@ -336,14 +349,13 @@ def get_inline_statics(static_path='evt/static/'):
     }
 
 
-def draw_secondary_elements(f, valency, total_cds, progress_bar, x_axis_len,
+def draw_secondary_elements(f, valency_cds, total_cds, progress_bar, x_axis_len,
                             y_min):
     f.line('x', 'y', source=progress_bar, line_color='green')
-    f.line(
-        range(0, x_axis_len), valency, line_color='orange', line_dash=(6, 6))
+    f.line('x', 'y', source=valency_cds, line_color='orange', line_dash=(6, 6))
     f.line('x', 'y', source=total_cds, line_color='red', name='total')
     f.quad(
-        top=valency,
+        top=0,
         bottom=y_min,
         left=0,
         right=x_axis_len,

@@ -101,7 +101,10 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         $('#legend' + index).appendTo($('.bk-plot-right:eq(' + index + ')'));
         $(gauge).appendTo('.bk-plot-left:eq(' + index + ')');
+        $('#smile' + index).appendTo('.bk-canvas-wrapper:eq(' + index + ')')
+        $('#sad' + index).appendTo('.bk-canvas-wrapper:eq(' + index + ')')
     });
+        // dupa
     {% for total in totals %}
         var gauge = evt.gauges[{{ loop.index0 }}];
         gauge['mean'] = {{ total.mean }};
@@ -132,6 +135,14 @@ document.addEventListener('DOMContentLoaded', function() {
         var id = '{{ total.source._id }}';    
         evt.lines[id] = {cds: cds, cds_orig_data: cds.get('data')};
     {% endfor %}
+
+
+    {% for valency in valencies %}
+        var cds = CDS.get('{{ valency.source._id }}');
+        var id = '{{ valency.source._id }}';    
+        evt.lines[id] = {cds: cds, cds_orig_data: cds.get('data')};
+        $('.bk-plot-left:eq({{ loop.index0 }})').append('<br>średnia:<br>' + Number(({{ valency.mean }}).toFixed(3)));
+    {% endfor %}    
 
     // Toggler is an input connected with one line, grouper groups togglers
     $('input.grouper').each(function(index) {

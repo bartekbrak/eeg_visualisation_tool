@@ -201,10 +201,7 @@ $(document).ready(function() {
         </td></tr>
 
         <tr><td class="header" colspan="3">Opis klienta</td></tr>
-        {{ render_field(form.client_name) }}
-        {{ render_field(form.research_name) }}
-        {{ render_field(form.date) }}
-        {{ render_field(form.sample_size) }}
+        {{ render_field(form.client_info_markdown, rows=10, cols=50) }}
     </table>
 
     <br>

@@ -7,7 +7,8 @@ from wtforms import (
     FloatField,
     Form,
     IntegerField,
-    StringField
+    StringField,
+    TextAreaField
 )
 
 
@@ -35,19 +36,6 @@ class ServerForm(Form):
         description='Odległość od górnej i dolnej krawędzi wykresu przy '
                     'największym wykresie'
     )
-    client_name = StringField(
-        'Nazwa klienta',
-        default='Nazwa klienta',
-    )
-    research_name = StringField(
-        'Nazwa Badania',
-        default='Nazwa Badania',
-    )
-    date = StringField(
-        'Data badania',
-        default='2015-08-08',
-    )
-    sample_size = StringField('Wielkośc próby', default='1000')
     plot_title = StringField(
         'Nazwa zakładki',
         default='EEG Dom Badawczy Maison',
@@ -56,4 +44,13 @@ class ServerForm(Form):
     colors = FieldList(
         label='Paleta',
         unbound_field=StringField(),
+    )
+    client_info_markdown = TextAreaField(
+        'Ramka z danymi o badaniu',
+        default='**Nazwa Klienta**: Nazwa Klienta\n'
+                '**Nazwa Badania**: Nazwa Badania\n'
+                '**Data**: 2015-08-08\n'
+                '**Próba**: 100',
+        description='Składnia <a href="https://en.wikipedia.org/wiki/'
+                    'Markdown#Example" target=_blank>Markdown</a> albo HTML.'
     )

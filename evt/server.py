@@ -17,6 +17,7 @@ from bokeh.plotting import figure
 from bokeh.resources import Resources
 from ffprobe import FFProbe
 from flask import Flask, jsonify, request, url_for
+from markdown import markdown
 
 from evt import memory, template_env
 from evt.constants import color_pickle
@@ -99,9 +100,12 @@ def get_end_user_file():
             colors=form.data['colors']
         )
         template_args.update(**form.data)
+        client_info = markdown(form.data['client_info_markdown'].replace(
+            '\r', '\n').replace('\n', '\n\n'))
         content = render_template(
             layout,
             template=template_env.get_template('result/result.html'),
+            client_info=client_info,
             **template_args
         )
         return jsonify(status='ok', content=content, traceback=logger)
@@ -222,6 +226,8 @@ def standalone():
         layout,
         '',
         template=template_env.get_template('result/result.html'),
+        client_info='ar walls. A collection of textile samples '
+                    'lay spread out on the ta',
         **template_args
     )
     outfile_filename = 'data/out.html'
@@ -322,6 +328,7 @@ def get_inline_statics(static_path='evt/static/'):
         'video_border_back': 'video_border_back.png',
         'video_border_down': 'video_border_down.png',
         'back': 'back.png',
+        'logo': 'logo.png',
     }
     return {
         var: b64encode(open(static_path + filename).read())

@@ -336,7 +336,7 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
     return layout, template_args
 
 
-def get_inline_statics(static_path='evt/static/'):
+def get_inline_statics():
     static_files = {
         'video_border_up': 'video_border_up.png',
         'video_border_back': 'video_border_back.png',
@@ -344,6 +344,9 @@ def get_inline_statics(static_path='evt/static/'):
         'back': 'back.png',
         'logo': 'logo.png',
     }
+    # dirty, huh? you think this piece is dirty, look around
+    static_path = os.path.abspath(os.path.dirname(__file__)) + '/static/'
+    print static_path
     return {
         var: b64encode(open(static_path + filename).read())
         for var, filename in static_files.items()

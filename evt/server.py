@@ -320,7 +320,8 @@ def get_inline_statics(static_path='evt/static/'):
     static_files = {
         'video_border_up': 'video_border_up.png',
         'video_border_back': 'video_border_back.png',
-        'video_border_down': 'video_border_down.png'
+        'video_border_down': 'video_border_down.png',
+        'back': 'back.png',
     }
     return {
         var: b64encode(open(static_path + filename).read())

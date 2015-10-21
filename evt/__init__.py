@@ -6,4 +6,3 @@ cachedir = '/tmp/evt_cache'
 memory = Memory(cachedir=cachedir, verbose=0)
 # uncomment to disable caching
 # memory.clear()
-

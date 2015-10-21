@@ -1,7 +1,3 @@
-import pytest
-
-from evt.data_getter import get_from_excel
-
 # def test_getting_from_csv():
 #     result = get_from_csv('tests/test_data/tomek.csv', column_name_map)
 #     assert isinstance(result, list)

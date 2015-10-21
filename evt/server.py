@@ -17,7 +17,6 @@ from bokeh.plotting import figure
 from bokeh.resources import Resources
 from ffprobe import FFProbe
 from flask import Flask, jsonify, request, url_for
-from IPython import embed
 
 from evt import memory, template_env
 from evt.constants import color_pickle

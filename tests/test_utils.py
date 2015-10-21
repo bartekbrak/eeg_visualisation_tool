@@ -1,9 +1,6 @@
 import re
 
-import pytest
-
-from evt.data_getter import get_from_excel
-from evt.utils import average_yaxis_by_properties, get_random_colour
+from evt.utils import get_random_colour
 
 # rather than checking that the content of a group has
 # same content, let's compare against some calculation for brevity, a sum,
@@ -30,7 +27,8 @@ test_data = (
 
 # @pytest.mark.parametrize('grouping_by,expected', test_data)
 # def test_average_yaxis_by_properties(grouping_by, expected):
-#     data = get_from_excel('tests/test_data/dane_tymbark.xlsx', column_name_map)
+#     data = get_from_excel(
+#         'tests/test_data/dane_tymbark.xlsx', column_name_map)
 #     result = average_yaxis_by_properties(grouping_by, data)
 #     for one_result, one_expected in zip(result, expected):
 #         description, grouped = one_result

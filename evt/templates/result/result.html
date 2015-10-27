@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>{{ title if title else "Plot" }}</title>
     {{ plot_resources|indent(8) }}
-    {{ plot_script|indent(8) }}
+    {{ script|indent(8) }}
 {% include 'result/js.html' %}
 {% include 'result/css.html' %}
 </head>

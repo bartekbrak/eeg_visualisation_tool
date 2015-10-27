@@ -10,7 +10,7 @@ from tempfile import NamedTemporaryFile
 
 import numpy
 import pkg_resources
-from bokeh.embed import file_html
+from bokeh.embed import file_html, components
 from bokeh.io import vform
 from bokeh.models import Callback, ColumnDataSource, HoverTool, Range1d
 from bokeh.plotting import figure
@@ -149,22 +149,37 @@ def get_tools():
 def get_figure(x_axis_len, **kwargs):
     f = figure(
         toolbar_location=None,
-        plot_width=658,
-        plot_height=200,
+        plot_width=690,
+        plot_height=140,
         # FIXME: this really should be 0, causes 0/1 to be displayed on axis
         x_range=Range1d(1, x_axis_len),
         x_axis_type='datetime',
+        logo=None,
         **kwargs
     )
-    f.ygrid.grid_line_alpha = 0.1
-    f.xgrid.grid_line_alpha = 0.2
     f.yaxis.minor_tick_line_color = None
     f.yaxis.major_tick_line_color = None
+    f.yaxis.axis_line_color = None
+    f.yaxis.major_label_text_font_style = 'bold'
+    f.yaxis.major_label_text_color = '#e2bad5'
+
+    f.xaxis.axis_line_color = None
+    f.xaxis.major_tick_line_color = None
     f.xaxis.axis_label_text_font_size = '12px'
-    # f.yaxis.major_label_standoff = 20
-    f.min_border_left = 60
-    f.min_border_right = 10
-    # f.h_symmetry = False
+    f.xaxis.major_label_text_font_style = 'bold'
+    f.xaxis.major_label_text_color = '#e2bad5'
+    f.h_symmetry = False
+    f.v_symmetry = False
+    f.min_border_left = 50
+    f.min_border_top = 10
+    f.min_border_bottom = 10
+    f.min_border_right = 0
+    f.outline_line_alpha = 0
+    f.xgrid.grid_line_color = '#dddddd'
+    f.xgrid.grid_line_width = 1
+    f.ygrid.grid_line_color = '#dddddd'
+    f.ygrid.grid_line_width = 1
+    # embed()
     return f
 
 
@@ -209,7 +224,7 @@ def standalone():
     video_encoded = b64encode(video_content)
     video_len, all_video_lens = get_video_len(video_content)
     print 'duration: %s out of %s' % (video_len, all_video_lens)
-    plots = [1, 1]
+    plots = [2, 1]
     sheets = get_from_excel(args.data)
 
     tp = []
@@ -226,8 +241,11 @@ def standalone():
         layout,
         '',
         template=template_env.get_template('result/result.html'),
-        client_info='ar walls. A collection of textile samples '
-                    'lay spread out on the ta',
+        client_info=markdown(
+            u'Nazwa Klienta:  \n**Nazwa Klienta**\n\n'
+            u'Nazwa Badania:  \n**Nazwa Badania**\n\n'
+            u'Data:  \n**2015-08-08**\n\n'
+            u'Proba:  \n**100**'),
         **template_args
     )
     outfile_filename = 'data/out.html'
@@ -279,7 +297,7 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
                 line_groups_per_plot.append({})
 
             f = get_figure(
-                x_axis_label=g['title'],
+                # x_axis_label=g['title'],
                 tools=get_tools(),
                 x_axis_len=x_axis_len,
                 y_range=Range1d(y_min, y_max),
@@ -313,7 +331,7 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
             valencies.append(valency_line)
 
             draw_secondary_elements(f, valency_cds, total_cds, progress_bar,
-                                    x_axis_len, y_min)
+                                    x_axis_len, y_min, y_max)
             if g['filter_column_names']:
                 for line in lines:
                     f.line(
@@ -323,6 +341,7 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
                         line_width=2
                     )
     layout = vform(*figures)
+    script, plots = components(figures)
     template_args = {
         'progress_bar_id': progress_bar.ref['id'],
         'progress_bar_y': progress_bar_y,
@@ -330,6 +349,8 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
         'line_groups_per_plot': line_groups_per_plot,
         'totals': totals,
         'valencies': valencies,
+        'plots': plots,
+        'script': script,
         # 'continuals': continuals
     }
     template_args.update(get_inline_statics())
@@ -343,6 +364,7 @@ def get_inline_statics():
         'video_border_down': 'video_border_down.png',
         'back': 'back.png',
         'logo': 'logo.png',
+        'brainvision': 'brainvision.png',
     }
     # dirty, huh? you think this piece is dirty, look around
     static_path = os.path.abspath(os.path.dirname(__file__)) + '/static/'
@@ -354,21 +376,32 @@ def get_inline_statics():
 
 
 def draw_secondary_elements(f, valency_cds, total_cds, progress_bar, x_axis_len,
-                            y_min):
-    f.line('x', 'y', source=progress_bar, line_color='green')
-    f.line('x', 'y', source=valency_cds, line_color='orange', line_dash=(6, 6))
-    f.line('x', 'y', source=total_cds, line_color='red', name='total')
+                            y_min, y_max):
     f.quad(
         top=0,
         bottom=y_min,
         left=0,
         right=x_axis_len,
-        alpha=0.3,
-        fill_color='#b19dc6',
-        line_color='#b19dc6',
-        line_width=2
+        alpha=0.1,
+        fill_color='red',
+        line_color=None,
+        # line_width=2
 
     )
+    f.quad(
+        top=0,
+        bottom=y_max,
+        left=0,
+        right=x_axis_len,
+        alpha=0.1,
+        fill_color='green',
+        # line_color='blue',
+        # line_width=2
+
+    )
+    f.line('x', 'y', source=progress_bar, line_color='green')
+    f.line('x', 'y', source=valency_cds, line_color='orange', line_dash=(6, 6), line_width=2)
+    f.line('x', 'y', source=total_cds, line_color='red', name='total', line_width=2)
 
 
 if __name__ == '__main__':

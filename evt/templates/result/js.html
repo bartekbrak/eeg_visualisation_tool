@@ -99,12 +99,11 @@ document.addEventListener('DOMContentLoaded', function() {
         evt.gauges[index] = {
             'gauge': new Gauge(gauge)
         };
-        $('#legend' + index).appendTo($('.bk-plot-right:eq(' + index + ')'));
-        $(gauge).appendTo('.bk-plot-left:eq(' + index + ')');
-        $('#smile' + index).appendTo('.bk-canvas-wrapper:eq(' + index + ')')
-        $('#sad' + index).appendTo('.bk-canvas-wrapper:eq(' + index + ')')
+{#        $('#legend' + index).appendTo($('.bk-plot-right:eq(' + index + ')'));#}
+{#        $(gauge).appendTo('.bk-plot-left:eq(' + index + ')');#}
+{#        $('#smile' + index).appendTo('.bk-canvas-wrapper:eq(' + index + ')')#}
+{#        $('#sad' + index).appendTo('.bk-canvas-wrapper:eq(' + index + ')')#}
     });
-        // dupa
     {% for total in totals %}
         var gauge = evt.gauges[{{ loop.index0 }}];
         gauge['mean'] = {{ total.mean }};
@@ -112,7 +111,12 @@ document.addEventListener('DOMContentLoaded', function() {
         gauge['gauge'].setOptions({
             threshold: {{ total.mean }},
             minValue : {{ total.min }},
-            maxValue : {{ total.max }}
+            maxValue : {{ total.max }},
+            colorBelow: "#e8536b",
+            colorAbove: "#bbc171",
+            pointer: {
+                color: "#4d225f"
+            },
         });
         gauge['gauge'].set({{ total.mean }});
     {% endfor %}
@@ -141,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var cds = CDS.get('{{ valency.source._id }}');
         var id = '{{ valency.source._id }}';    
         evt.lines[id] = {cds: cds, cds_orig_data: cds.get('data')};
-        $('.bk-plot-left:eq({{ loop.index0 }})').append('<br>średnia:<br>' + Number(({{ valency.mean }}).toFixed(3)));
+        $('.gauge_wrapper:eq({{ loop.index0 }})').append('<br>średnia: ' + Number(({{ valency.mean }}).toFixed(3)));
     {% endfor %}    
 
     // Toggler is an input connected with one line, grouper groups togglers
@@ -181,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     // evt.video.addEventListener('mousedown', evt.toggle_video);
-    $('#wideo_wrapper').hover(
+    $('#video_td').hover(
         function() {
             evt.mouse_on_video = true;
         },

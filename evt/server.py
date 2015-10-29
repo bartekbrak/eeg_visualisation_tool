@@ -342,6 +342,8 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
                     )
     layout = vform(*figures)
     script, plots = components(figures)
+    if not isinstance(plots, tuple):
+        plots = tuple([plots])
     template_args = {
         'progress_bar_id': progress_bar.ref['id'],
         'progress_bar_y': progress_bar_y,

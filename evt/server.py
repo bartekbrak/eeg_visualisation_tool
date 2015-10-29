@@ -20,15 +20,15 @@ from flask import Flask, jsonify, request, url_for
 from markdown import markdown
 
 from evt import memory, template_env
-from evt.constants import color_pickle
+from evt.constants import palette_pickle, gauges_pickle
 from evt.data_getter import continuous_array, get_from_excel, get_mean, grouper
-from evt.forms import ServerForm
+from evt.forms import ServerForm, GaugeColors
 from evt.models import Line
 from evt.utils import (
     average_yaxis_by_properties_separate,
     distinct_colors,
-    get_pickled_colors
-)
+    get_pickled_colors,
+    color_pairs)
 
 app = Flask(__name__, static_url_path='/evt/templates')
 
@@ -44,7 +44,13 @@ template_env.globals['get_resource_as_string'] = get_resource_as_string
 
 @app.route('/')
 def server():
-    form = ServerForm(colors=get_pickled_colors(color_pickle))
+    form = ServerForm(
+        colors=get_pickled_colors(palette_pickle, distinct_colors[:20]),
+        no_of_plots=[
+            GaugeColors(colors=get_pickled_colors(gauges_pickle, color_pairs[:2])),
+        ]
+    )
+    # embed()
     kwargs = {
         'get_end_user_file_url': url_for('.get_end_user_file'),
         'filesaver': url_for('static', filename='FileSaver.min.js'),
@@ -77,23 +83,24 @@ def get_end_user_file():
         video_encoded = b64encode(video_content)
         form = ServerForm(request.form)
 
-        pickle.dump(form.data['colors'], open(color_pickle, 'w'))
+        pickle.dump(form.data['colors'], open(palette_pickle, 'w'))
+        # pickle.dump(form.data['no_of_plots'][0], open(gauges_pickle, 'w'))
         video_len, all_video_lens = get_video_len(video_content)
         logger += 'duration: %s out of %s\n' % (video_len, all_video_lens)
-        plots = [int(_) for _ in form.data['no_of_plots'].split(',')]
+        # plots = [int(_) for _ in form.data['no_of_plots'].split(',')]
         sheets = get_from_excel(data_file)
         logger += 'sheets: %s' % [
             [_['filter_column_names'], _['title']]
             for _ in sheets
             ]
-        tp = []
+        plots = []
         # will truncate sheets if no_of_plots is smaller
-        for no_of_plots, sheet in zip(plots, sheets):
-            tp.append(dict(no_of_plots=no_of_plots, **sheet))
+        for no_of_plots, sheet in zip(form.data['no_of_plots'], sheets):
+            plots.append(dict(no_of_plots=no_of_plots, **sheet))
         _validate_data_length(form.data['sampling_rate'], sheets, video_len)
 
         layout, template_args = the_meat(
-            tp=tp,
+            plots=plots,
             sampling_rate=form.data['sampling_rate'],
             video_data=video_encoded,
             y_margin=form.data['y_margin'],
@@ -262,23 +269,27 @@ def _validate_data_length(rate, sheets, video_len):
         assert data_covers < video_len + rate, assert_complaint
 
 
-def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
+def the_meat(plots, sampling_rate, video_data, y_margin, colors=distinct_colors):
     line_groups_per_plot = []
     totals = []
     # valency is misleading, this is just average
     valencies = []
     figures = []
     progress_bar_y, progress_bar = get_progress_bar()
-    # continuals = {}
-    for g in tp:
-        x_axis_len = len(g['data'][0]['as']) * sampling_rate + sampling_rate
-        for _ in range(g['no_of_plots']):
+    for plot in plots:
+        x_axis_len = len(plot['data'][0]['as']) * sampling_rate + sampling_rate
+        gauge_colours = []
+        for color_below, color_above in zip(*[iter(plot['no_of_plots']['colors'])] * 2):
+            gauge_colours.append({
+                'color_above': color_above,
+                'color_below': color_below
+            })
             lines = []
-            total = get_mean(g['data'], axis=0)
-            if g['filter_column_names']:
+            total = get_mean(plot['data'], axis=0)
+            if plot['filter_column_names']:
                 line_groups = grouper(
-                    g['data'],
-                    g['filter_column_names'],
+                    plot['data'],
+                    plot['filter_column_names'],
                     sampling_rate,
                     average_yaxis_by_properties_separate,
                     itertools.cycle(colors)
@@ -308,7 +319,7 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
             x_range = range(0, len(total) * sampling_rate, sampling_rate)
             total_data = dict(x=x_range, y=total)
             total_cds = ColumnDataSource(data=total_data)
-            valency = get_mean(g['data'])
+            valency = get_mean(plot['data'])
             total_line = Line(
                 total,
                 total_cds,
@@ -330,9 +341,11 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
             )
             valencies.append(valency_line)
 
-            draw_secondary_elements(f, valency_cds, total_cds, progress_bar,
-                                    x_axis_len, y_min, y_max)
-            if g['filter_column_names']:
+            draw_secondary_elements(
+                f, valency_cds, total_cds, progress_bar, x_axis_len, y_min,
+                y_max, color_above, color_below
+            )
+            if plot['filter_column_names']:
                 for line in lines:
                     f.line(
                         'x', 'y',
@@ -353,7 +366,7 @@ def the_meat(tp, sampling_rate, video_data, y_margin, colors=distinct_colors):
         'valencies': valencies,
         'plots': plots,
         'script': script,
-        # 'continuals': continuals
+        'gauge_colours': gauge_colours,
     }
     template_args.update(get_inline_statics())
     return layout, template_args
@@ -370,22 +383,23 @@ def get_inline_statics():
     }
     # dirty, huh? you think this piece is dirty, look around
     static_path = os.path.abspath(os.path.dirname(__file__)) + '/static/'
-    print static_path
     return {
         var: b64encode(open(static_path + filename).read())
         for var, filename in static_files.items()
     }
 
 
-def draw_secondary_elements(f, valency_cds, total_cds, progress_bar, x_axis_len,
-                            y_min, y_max):
+def draw_secondary_elements(
+        f, valency_cds, total_cds, progress_bar, x_axis_len, y_min, y_max,
+        color_above, color_below
+    ):
     f.quad(
         top=0,
         bottom=y_min,
         left=0,
         right=x_axis_len,
         alpha=0.1,
-        fill_color='red',
+        fill_color=color_below,
         line_color=None,
         # line_width=2
 
@@ -396,7 +410,7 @@ def draw_secondary_elements(f, valency_cds, total_cds, progress_bar, x_axis_len,
         left=0,
         right=x_axis_len,
         alpha=0.1,
-        fill_color='green',
+        fill_color=color_above,
         # line_color='blue',
         # line_width=2
 

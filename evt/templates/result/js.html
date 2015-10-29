@@ -112,8 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
             threshold: {{ total.mean }},
             minValue : {{ total.min }},
             maxValue : {{ total.max }},
-            colorBelow: "#e8536b",
-            colorAbove: "#bbc171",
+            colorAbove: '{{ gauge_colours[loop.index0].color_above }}',
+            colorBelow: '{{ gauge_colours[loop.index0].color_below }}',
             pointer: {
                 color: "#4d225f"
             },

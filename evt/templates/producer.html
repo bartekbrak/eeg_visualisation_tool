@@ -1,8 +1,16 @@
+{# to debug a field:#}
+{#<pre>#}
+{#{{ color.data.__dict__|pprint(verbose=True)|e }}#}
+{#</pre>#}
+
+{#Definitions:#}
+{#cg - color group#}
 {% from "producer_helpers.html" import render_field %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 <title>EEG Visualisation Tool Producer</title>
 <style>
     body {
@@ -41,34 +49,40 @@
         font-family: monospace;
         font-size: 10px;
     }
-    .button {
-        font-size: 50px;
-        font-weight: 900;
-        display: inline-block;
+    .fa {
+        font-size: 20px;
         cursor: pointer;
-        text-align: center;
+        line-height: 24px;
+        vertical-align: middle;
         -webkit-touch-callout: none;
         -webkit-user-select: none;
         -khtml-user-select: none;
         -moz-user-select: none;
         -ms-user-select: none;
-        user-select: none;        
     }
-    #add_another_button {
-        color: green;
+    .fa-minus-circle {
+        color: lightcoral;
     }
-    #rm_button {
-        color: red;
-    }    
+    .fa-plus-circle {
+        color: lightseagreen;
+    }
     .color {
         border: none;
         padding: 4px;
         margin: 1px;
-        width: 100px;
+        width: 60px;
         text-align: center;
         border-radius: 10px;
         cursor: pointer;
         outline: none;
+    }
+    .left_round {
+        border-radius: 10px 0 0 10px;
+        margin-right: 0px;
+    }
+    .right_round {
+        border-radius: 0 10px 10px 0;
+        margin-left: 0px;
     }
 </style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
@@ -121,10 +135,65 @@ $(document).ready(function() {
             event.preventDefault();
         }
     });
-    var clone_field_list = function(selector) {
+    var clone_plot_colors_element = function(selector) {
+        var new_left_element = $(selector[0]).clone(true);
+        var new_right_element = $(selector[1]).clone(true);
+        var elem_name = new_left_element[0].name;
+        name_re = /(.+?)-(\d{1,2})-(.+?)-(\d{1,2})/
+        var match = name_re.exec(elem_name);
+        var name = match[1];
+        var id = parseInt(match[2]);
+        var subname = match[3];
+        var subid = parseInt(match[4]);
+        var left_name = name + '-' + id + '-' + subname + '-' + (subid + 2);
+        var right_name = name + '-' + id + '-' + subname + '-' + (subid + 3);
+        new_left_element.attr({'name': left_name, 'id': left_name});
+        new_right_element.attr({'name': right_name, 'id': right_name});
+        $(selector[1]).after(new_left_element);
+        $(new_left_element).after(new_right_element);
+    };
+    $('.add_color1').click(function (el) {
+        var cg = $(this).attr('data-cg');
+        clone_plot_colors_element($('input[data-cg=' + cg + ']').slice(-2));
+    });
+    $('.rm_color1').click(function(el) {
+        var cg = $(this).attr('data-cg');
+        var sel = $('input[data-cg=' + cg + ']');
+        var sel = $('input[data-cg=' + cg + ']');
+       if (sel.length > 2)  $(sel.slice(-2)).remove();
+    });
+    var clone_cg = function(selector) {
+        var new_cg = $(selector).clone(true);
+        new_cg.children('.color').remove();
+        var new_left_element = $(selector).children('.left_round:first').clone(true);
+        var new_right_element = $(selector).children('.right_round:first').clone(true);
+        var elem_name = new_left_element[0].name;
+        name_re = /(.+?)-(\d{1,2})-(.+?)-(\d{1,2})/
+        var match = name_re.exec(elem_name);
+        var name = match[1];
+        var id = parseInt(match[2]);
+        var subname = match[3];
+        var left_name = name + '-' + (id + 1) + '-' + subname + '-0';
+        var right_name = name + '-' + (id + 1) + '-' + subname + '-0';
+        new_left_element.attr({'name': left_name, 'id': left_name});
+        new_right_element.attr({'name': right_name, 'id': right_name});
+        new_cg.prepend(new_right_element);
+        new_cg.prepend(new_left_element);
+        new_cg.children('.fa').attr('data-cg', 'cg'+ (id+1));
+        new_cg.children('.color').attr('data-cg', 'cg'+ (id+1));
+        $(selector).after(new_cg);
+    };
+    $('#add_cg').click(function (el) {
+        clone_cg('.cg:last');
+    });
+    $('#rm_cg').click(function(el) {
+        if ($('.cg').length > 1)  $($('.cg:last').remove());
+    });
+
+    var clone_palette_element = function(selector) {
         var new_element = $(selector).clone(true);
         var elem_name = new_element[0].name;
-        name_re = /(.*)-(\d{1,2})/
+        name_re = /(.+?)-(\d{1,2})/
         var match = name_re.exec(elem_name);
         var bare_name = match[1];
         var new_id = parseInt(match[2]) + 1;
@@ -132,11 +201,11 @@ $(document).ready(function() {
         new_element.attr({'name': new_name, 'id': new_name})
         $(selector).after(new_element);
     };
-    $('#add_another_button').click(function () {
-        clone_field_list('.color:last');
+    $('#add_color2').click(function () {
+        clone_palette_element('.color2:last');
     });
-    $('#rm_button').click(function() {
-       $('.color:last').remove(); 
+    $('#rm_color2').click(function() {
+        if ($('.color2').length > 1) $('.color2:last').remove();
     });
     $('.color').colorPicker({
     renderCallback: function($elm, toggled) {
@@ -187,17 +256,46 @@ $(document).ready(function() {
         {{ render_field(form.data_file, required=True) }}
         {{ render_field(form.clip, required=True) }}
         <tr><td class="header" colspan="3">Konfiguracja</td></tr>
-        {{ render_field(form.no_of_plots) }}
+        <tr><td>
+            {{ form.no_of_plots.label }}<br>
+            <i class="fa fa-plus-circle" id="add_cg"></i>
+            <i class="fa fa-minus-circle" id="rm_cg"></i>
+        </td>
+        <td>
+            {% for cg in form.no_of_plots %}
+                {% set outer_loop = loop %}
+                <span class="cg">
+
+                {% for color in cg.colors -%}
+                    {{ color(
+                        class=('right_round' if loop.index % 2 == 0 else 'left_round') + ' color color1 no-alpha',
+                        data_cg='cg' + outer_loop.index0|e,
+                        value=color.data.data
+                        )
+                    }}
+                {%- endfor %}
+                <i class="fa fa-plus-circle add_color1" data-cg='cg{{outer_loop.index0}}'></i>
+                <i class="fa fa-minus-circle rm_color1" data-cg='cg{{outer_loop.index0}}'></i>
+                <br>
+                </span>
+            {% endfor %}
+        </td>
+        <td>
+            {{ form.no_of_plots.description}}
+        </td>
+        </tr>
+{#        {{ render_field(form.no_of_plots) }}#}
         {{ render_field(form.sampling_rate, type='number', min=0, max=10000) }}
         {{ render_field(form.y_margin, type='number', step='0.1', min=0, max=10) }}
         {{ render_field(form.plot_title) }}
         <tr><td>
             {{ form.colors.label }}
-        </td><td colspan="2">
-            {% for color in form.colors %}{{ color(class='color no-alpha') }}{% endfor %}
             <br>
-            <div class="button" id="add_another_button">+</div>
-            <div class="button" id="rm_button">–</div>
+            <i class="fa fa-plus-circle" id="add_color2"></i>
+            <i class="fa fa-minus-circle" id="rm_color2"></i>
+        </td><td colspan="2">
+            {% for color in form.colors %}{{ color(class='color color2 no-alpha') }}{% endfor %}
+
         </td></tr>
 
         <tr><td class="header" colspan="3">Opis klienta</td></tr>

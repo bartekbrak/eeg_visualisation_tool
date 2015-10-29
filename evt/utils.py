@@ -5,7 +5,7 @@ from operator import itemgetter
 
 from numpy import mean
 
-from evt.constants import color_pickle, numerical_data_column_name
+from evt.constants import palette_pickle, numerical_data_column_name
 
 
 def to_tuple(what):
@@ -58,6 +58,12 @@ distinct_colors = [
     '#F20081', '#401D10', '#2B330D', '#005266', '#6060BF', '#8C466C',
     '#D9896C', '#BFE673'
 ]
+color_pairs = [
+    '#e8536b', '#bbc171',
+    '#ffff00', '#0000ff',
+    '#7F2200', '#CCFF00',
+    '#6060BF', '#8C466C'
+]
 cycler = itertools.cycle(distinct_colors)
 
 
@@ -65,9 +71,9 @@ def get_random_colour():
     return cycler.next()
 
 
-def get_pickled_colors(filename=color_pickle):
+def get_pickled_colors(filename=palette_pickle, default=None):
     if not os.path.isfile(filename):
         print 'no pickles'
-        return distinct_colors[:20]
+        return default
     with open(filename) as f:
         return pickle.load(f)

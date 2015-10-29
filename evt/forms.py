@@ -1,6 +1,10 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
+"""
+no_of_plots is misleading, this holds gauge colours
+"""
+
 from wtforms import (
     FieldList,
     FileField,
@@ -8,9 +12,13 @@ from wtforms import (
     Form,
     IntegerField,
     StringField,
-    TextAreaField
-)
+    TextAreaField,
+    FormField)
 
+class GaugeColors(Form):
+    colors = FieldList(
+        unbound_field=StringField(),
+    )
 
 class ServerForm(Form):
     data_file = FileField(
@@ -20,10 +28,13 @@ class ServerForm(Form):
         'Klip',
         description='Klip z nagraniem. MP4 jest rekomendowanym formatem'
     )
-    no_of_plots = StringField(
-        'Liczba wykresów',
-        default="1, 1",
-        description='Liczba wykresów na arkusz. Cyfry rozdzielone przecinkami.'
+    no_of_plots = FieldList(
+        label='Liczba<br>wykresów',
+        unbound_field=FormField(GaugeColors),
+        description='Każdy rząd reprezentuje jeden arkusz z danych zawierający '
+                    'jeden bądź więcej wykresów. Każda para kolorów '
+                    'reprezentuje jeden wykres opisany dwoma kolorami: poniżej '
+                    'i powyżej średniej.'
     )
     sampling_rate = IntegerField(
         'Próbkowanie',

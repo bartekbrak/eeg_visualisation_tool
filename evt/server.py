@@ -156,7 +156,7 @@ def get_tools():
 def get_figure(x_axis_len, **kwargs):
     f = figure(
         toolbar_location=None,
-        plot_width=690,
+        plot_width=680,
         plot_height=140,
         # FIXME: this really should be 0, causes 0/1 to be displayed on axis
         x_range=Range1d(1, x_axis_len),
@@ -177,8 +177,8 @@ def get_figure(x_axis_len, **kwargs):
     f.xaxis.major_label_text_color = '#e2bad5'
     f.h_symmetry = False
     f.v_symmetry = False
-    f.min_border_left = 50
-    f.min_border_top = 10
+    f.min_border_left = 40
+    f.min_border_top = 18
     f.min_border_bottom = 10
     f.min_border_right = 0
     f.outline_line_alpha = 0
@@ -231,7 +231,14 @@ def standalone():
     video_encoded = b64encode(video_content)
     video_len, all_video_lens = get_video_len(video_content)
     print 'duration: %s out of %s' % (video_len, all_video_lens)
-    plots = [2, 1]
+    plots = [
+        {
+            'colors': ['#e8536b', '#bbc171',]
+        },
+        {
+            'colors': ['#97d3db', '#f0e27c', '#53e87d', '#9753e8']
+        },
+    ]
     sheets = get_from_excel(args.data)
 
     tp = []
@@ -276,10 +283,12 @@ def the_meat(plots, sampling_rate, video_data, y_margin, colors=distinct_colors)
     valencies = []
     figures = []
     progress_bar_y, progress_bar = get_progress_bar()
+    titles = []
+    gauge_colours = []
     for plot in plots:
         x_axis_len = len(plot['data'][0]['as']) * sampling_rate + sampling_rate
-        gauge_colours = []
         for color_below, color_above in zip(*[iter(plot['no_of_plots']['colors'])] * 2):
+            titles.append(plot['title'])
             gauge_colours.append({
                 'color_above': color_above,
                 'color_below': color_below
@@ -308,7 +317,6 @@ def the_meat(plots, sampling_rate, video_data, y_margin, colors=distinct_colors)
                 line_groups_per_plot.append({})
 
             f = get_figure(
-                # x_axis_label=g['title'],
                 tools=get_tools(),
                 x_axis_len=x_axis_len,
                 y_range=Range1d(y_min, y_max),
@@ -367,6 +375,7 @@ def the_meat(plots, sampling_rate, video_data, y_margin, colors=distinct_colors)
         'plots': plots,
         'script': script,
         'gauge_colours': gauge_colours,
+        'titles': titles
     }
     template_args.update(get_inline_statics())
     return layout, template_args

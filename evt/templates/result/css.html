@@ -54,15 +54,24 @@
         color: #542365;
     }
     .gauge_td .gauge_wrapper {
-        background: linear-gradient(to right, #e9c8de, white);
-        margin-top: 10px;
+        background: linear-gradient(to right, white, #e9c8de);
+        border-top: 2px solid #542365;
+{#        margin-top: 10px;#}
         height: 102px;
     }
+    .gauge_title {
+        height: 18px;
+        font-size: 18px;
+        text-align: left;
+        font-weight: 900;
+    }
+
     .logo_td {
         vertical-align: top;
     }
     #logo {
         margin: 10px;
+        border-bottom: 3px solid #7a3c8f;
 {#        display: block;#}
     }
     .bk-plot-wrapper {
@@ -70,8 +79,8 @@
     }
 
     label {
-        padding: 5px;
-        min-width: 130px;
+        padding: 2px;
+        min-width: 100px;
         font-weight: 100;
         display: block;
         white-space: nowrap;
@@ -101,10 +110,13 @@
         cursor: pointer;
     }
     .legend {
+        font-family: "Arial Narrow", "Liberation Sans Narrow", Arial, sans-serif;
         color: gray;
         font-size: 14px;
         background-color: #f6ebf3;
         margin-left: 10px;
+        display: block;
+        padding: 5px;
     }
     .legend td {
 {#        padding-left: 10px;#}
@@ -112,7 +124,7 @@
     }
     .legend_td {
         vertical-align: top;
-        padding-top: 10px;
+        padding-top: 18px;
     }
 
     .plot_td {

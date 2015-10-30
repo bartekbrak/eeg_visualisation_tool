@@ -1,7 +1,7 @@
 <body>
 <table id="mainframe">
 
-    <tr><td></td><td  width="50"></td><td></td><td ></td></tr>
+    <tr><td></td><td  width="40"></td><td></td><td ></td></tr>
     <tr>
         <td class="logo_td" colspan="2">
             <img id="logo" alt="Dom Badawczy Maison" src="data:image/png;base64,{{ brainvision }}"/>
@@ -25,6 +25,7 @@
     {% for plot in plots %}
     <tr>
         <td class="gauge_td">
+            <div class="gauge_title">{{ titles[loop.index0] }}</div>
             <div class="gauge_wrapper">
                 <canvas width=120 height=70 class="gauge" id="gauge{{ loop.index0 }}"></canvas>
             </div>
@@ -75,12 +76,12 @@
                 </td>
             {% endfor %}
             </tr>
-            <tr class="bottom_gradient">
-                <td></td>
-            {% for _ in line_groups %}
-                <td></td>
-            {% endfor %}
-            </tr>
+{#            <tr class="bottom_gradient">#}
+{#                <td></td>#}
+{#            {% for _ in line_groups %}#}
+{#                <td></td>#}
+{#            {% endfor %}#}
+{#            </tr>#}
             </table>
         </td>
     </tr>

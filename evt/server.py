@@ -157,7 +157,7 @@ def get_figure(x_axis_len, **kwargs):
     f = figure(
         toolbar_location=None,
         plot_width=680,
-        plot_height=140,
+        plot_height=151,
         # FIXME: this really should be 0, causes 0/1 to be displayed on axis
         x_range=Range1d(1, x_axis_len),
         x_axis_type='datetime',

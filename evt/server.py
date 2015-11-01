@@ -407,7 +407,7 @@ def draw_secondary_elements(
         bottom=y_min,
         left=0,
         right=x_axis_len,
-        alpha=0.1,
+        alpha=0.3,
         fill_color=color_below,
         line_color=None,
         # line_width=2
@@ -418,7 +418,7 @@ def draw_secondary_elements(
         bottom=y_max,
         left=0,
         right=x_axis_len,
-        alpha=0.1,
+        alpha=0.3,
         fill_color=color_above,
         # line_color='blue',
         # line_width=2

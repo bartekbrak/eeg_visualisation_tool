@@ -274,8 +274,9 @@ $(document).ready(function() {
                         )
                     }}
                 {%- endfor %}
-                <i class="fa fa-plus-circle add_color1" data-cg='cg{{outer_loop.index0}}'></i>
-                <i class="fa fa-minus-circle rm_color1" data-cg='cg{{outer_loop.index0}}'></i>
+{# Disallow multiple plots per spreadhseet #}
+{#                <i class="fa fa-plus-circle add_color1" data-cg='cg{{outer_loop.index0}}'></i>#}
+{#                <i class="fa fa-minus-circle rm_color1" data-cg='cg{{outer_loop.index0}}'></i>#}
                 <br>
                 </span>
             {% endfor %}

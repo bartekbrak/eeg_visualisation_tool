@@ -236,7 +236,7 @@ def standalone():
             'colors': ['#e8536b', '#bbc171',]
         },
         {
-            'colors': ['#97d3db', '#f0e27c', '#53e87d', '#9753e8']
+            'colors': ['#97d3db', '#f0e27c']
         },
     ]
     sheets = get_from_excel(args.data)

@@ -1,0 +1,53 @@
+<table class="legend" id="legend{{ loop.index0 }}">
+<tr><td id="legend_v_upper_gradient"></td></tr>
+<tr>
+
+{# totals #}
+<td class="with_bottom_padding">
+    <label class="dark_color_square">
+    {% set total = totals[0] %}
+    {% set valency = valencies[0] %}
+    <input
+            type="checkbox"
+            class="toggler"
+            checked
+            data-id="{{ total.source._id }}">
+    <span class="inliner" style="color: {{ total.color }}">Total</span>
+    </label>
+    <br/>
+    <label class="grad_color_square">
+    <input
+            type="checkbox"
+            class="toggler"
+            checked
+            data-id="{{ valency.source._id }}">
+    <span class="inliner" style="color: {{ valency.color }}">Średnia<div id="valency"></div></span>
+    </label>
+</td></tr>
+
+{% set line_groups = line_groups_per_plot[0] %}
+{% set outer_loop = loop %}
+{% for group_name, lines in line_groups.iteritems() %}
+    <tr><td class="with_bottom_padding"><label class="dark_color_square">
+    <input type="checkbox" class="grouper" data-group-name="{{ outer_loop.index0 }}-{{ group_name }}">
+        <span class="inliner">{{ group_name }}</span>
+    </label>
+    <br/>
+    {% for line in lines %}
+        <label class="grad_color_square">
+        <input
+                type="checkbox"
+                class="toggler"
+                data-id="{{ line.source._id }}"
+                data-group-name="{{ outer_loop.index0 }}-{{ group_name }}">
+        {% for filter, value in line.description.items() %}
+            <span class="inliner" style="color: {{ line.color }}">{{ value }}</span>
+        {% endfor %}
+        </label>
+        <br/>
+    {% endfor %}
+    </td></tr>
+{% endfor %}
+</tr>
+<tr><td id="legend_v_lower_gradient"></td></tr>
+</table>

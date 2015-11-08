@@ -19,9 +19,15 @@ table {
 .block {
     display: block;
 }
+#mainframe {
+    display: inline-block;
+    vertical-align: top;
+}
 /* video row */
 #video_row td {
     vertical-align: top;
+    /* icons need this */
+    position: relative;
 }
 .video_border_up, .video_border_down {
     width: 640px;
@@ -56,7 +62,7 @@ table {
 .icons {
     display: none;
     position: absolute;
-    bottom: 50px;
+    bottom: 55px;
     left: 20px;
     width: 50px;
     height: 50px;
@@ -103,8 +109,16 @@ label .inliner {
     background-color: #e9c8de;
     font-weight: 900;
 }
+#legend_v .dark_color_square {
+    margin: 10px 13px 0 13px;
+    font-family: "Arial", "Liberation Sans", Arial, sans-serif;
+
+}
 .grad_color_square {
     background: linear-gradient(to right, #f7f5f8, #f6ebf3);
+}
+#legend_v .grad_color_square {
+    margin: 10px 13px 0 13px;
 }
 .grouper {
     border: 1px solid gray;
@@ -118,10 +132,21 @@ label, input[type=checkbox] {
     color: gray;
     font-size: 14px;
     background-color: #f6ebf3;
-    margin-left: 10px;
     display: block;
-    padding: 5px;
     min-height: 94px;
+}
+.legend_h .legend{
+    margin-left: 10px;
+    padding: 5px;
+}
+#legend_v .legend{
+    margin-left: 25px;
+}
+#legend_v .with_bottom_padding {
+    padding-bottom: 40px;
+}
+#legend_v label {
+    padding: 2px 8px 2px 8px
 }
 .legend td {
     vertical-align: top;
@@ -142,6 +167,22 @@ label, input[type=checkbox] {
     display: inline-block;
     vertical-align: middle;
     margin-left: 10px;
+}
+#legend_v {
+    font-size: 10px;
+    display: inline-block;
+
+}
+
+#legend_v_upper_gradient {
+    height: 35px;
+    background: linear-gradient(white 15%, #f6ebf3);
+
+}
+#legend_v_lower_gradient {
+    height: 30px;
+    background: linear-gradient(#f6ebf3, white 85%);
+
 }
 
 /* plots */

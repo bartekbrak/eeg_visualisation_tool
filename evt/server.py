@@ -235,9 +235,9 @@ def standalone():
         {
             'colors': ['#e8536b', '#bbc171',]
         },
-        {
-            'colors': ['#97d3db', '#f0e27c']
-        },
+        # {
+        #     'colors': ['#97d3db', '#f0e27c']
+        # },
     ]
     sheets = get_from_excel(args.data)
 
@@ -375,7 +375,8 @@ def the_meat(plots, sampling_rate, video_data, y_margin, colors=distinct_colors)
         'plots': plots,
         'script': script,
         'gauge_colours': gauge_colours,
-        'titles': titles
+        'titles': titles,
+        'legend': 'vertical' if len(plots) == 1 else 'horizontal'
     }
     template_args.update(get_inline_statics())
     return layout, template_args

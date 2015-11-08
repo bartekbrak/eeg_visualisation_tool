@@ -1,181 +1,173 @@
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-    }
-    body {
-        font-family: sans-serif;
-        font-size: 0;
-        margin: auto;
-        display: table;
-        padding:10px;
-    }
-    .video_border_up {
-        display: block;
-        width: 640px;
-        height: 45px;
-        background: url(data:image/png;base64,{{ video_border_up }}) no-repeat;
-    }
-    .video_border_down {
-        display: block;
-        width: 640px;
-        height: 40px;
-        background: url(data:image/png;base64,{{ video_border_down }}) no-repeat;
-    }
-    #video_wrapper {
-{#        width: 660px;#}
-        display: inline-block;
-        vertical-align: top;
-    }
-    video {
-        display: block;
-    }
-    #video_td {
-        position: relative;
-    }
-    .icons {
-        display: none;
-        position: absolute;
-        bottom: 50px;
-        left: 20px;
-        width: 50px;
-        height: 50px;
-    }
-    #play-icon {
-        display: initial;
-    }
+/* affecting all */
+* {
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: sans-serif;
+    font-size: 0;
+    margin: auto;
+    display: table;
+    padding:10px;
+}
+table {
+    border-collapse: collapse;
+}
 
-    .gauge_td {
-{#        background: linear-gradient(to right, white , #e9c8de);#}
-{#        width:300px;#}
-        text-align: center;
-        vertical-align: top;
-        font-size: 14px;
-        color: #542365;
-    }
-    .gauge_td .gauge_wrapper {
-        background: linear-gradient(to right, white 15%, #e9c8de);
-        border-top: 2px solid #542365;
-{#        margin-top: 10px;#}
-        height: 102px;
-    }
-    .gauge_title {
-        height: 18px;
-        font-size: 16px;
-        text-align: left;
-{#        font-weight: 900;#}
-    }
+/* functional */
+.block {
+    display: block;
+}
+/* video row */
+#video_row td {
+    vertical-align: top;
+}
+.video_border_up, .video_border_down {
+    width: 640px;
+}
+.video_border_up {
+    height: 45px;
+    background: url(data:image/png;base64,{{ video_border_up }}) no-repeat;
+}
+.video_border_down {
+    height: 40px;
+    background: url(data:image/png;base64,{{ video_border_down }}) no-repeat;
+}
 
-    .logo_td {
-        vertical-align: top;
-    }
-    #logo {
-        margin: 10px;
-        border-bottom: 3px solid #7a3c8f;
-        margin-top: 45px;
-    }
-    .bk-plot-wrapper {
-{#        margin-bottom: 5px;#}
-    }
+#logo {
+    margin: 10px;
+    border-bottom: 3px solid #7a3c8f;
+    margin-top: 45px;
+}
 
-    label {
-        padding: 2px;
-        min-width: 100px;
-        font-weight: 100;
-        display: block;
-        white-space: nowrap;
-        padding-right: 10px;
-        float: left;
-    }
-    label input {
-        vertical-align: middle;
-        margin: auto !important;
-    }
-    label .inliner {
-        vertical-align: middle;
-    }
-    .dark_color_square {
-        background-color: #e9c8de;
-        font-weight: 900;
-    }
-    .grad_color_square {
-        background: linear-gradient(to right, #f7f5f8, #f6ebf3);
-    }
-    .grouper {
-        border: 1px solid gray;
-{#        border-radius: 5px;#}
+#client {
+    width: 190px;
+    min-height: 100px;
+    color: #542365;
+    padding: 10px;
+    font-size: 18px;
+}
+#client p {
+    margin-bottom: 1.5em;
+}
 
-    }
-    label, input[type=checkbox] {
-        cursor: pointer;
-    }
-    .legend {
-        font-family: "Arial Narrow", "Liberation Sans Narrow", Arial, sans-serif;
-        color: gray;
-        font-size: 14px;
-        background-color: #f6ebf3;
-        margin-left: 10px;
-        display: block;
-        padding: 5px;
-        min-height: 94px;
-    }
-    .legend td {
-{#        padding-left: 10px;#}
-        vertical-align: top;
-    }
-    .legend_td {
-        vertical-align: top;
-        padding-top: 18px;
-    }
+/* play / pause icons */
+.icons {
+    display: none;
+    position: absolute;
+    bottom: 50px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+}
+#play-icon {
+    display: initial;
+}
 
-    .plot_td {
-        vertical-align: top;
-    }
-    .bottom_gradient td {
-        height:10px;
-        background: linear-gradient(#f6ebf3, #ffffff);
-    }
-    table {
-        border-collapse: collapse;
-    }
-    #client {
-        width: 190px;
-        min-height: 100px;
-        color: #542365;
-        padding: 10px;
-        font-size: 18px;
-    }
-    #client p {
-        margin-bottom: 1.5em;
-    }
-    #valency {
-        width: 30px;
-        border-bottom: 2px dashed orange;
-        height: 1px;
-        display: inline-block;
-        vertical-align: middle;
-        margin-left: 10px;
-    }
-    .bk-canvas-events { 
-        cursor: ew-resize
-    }
-    .bk-plot-left {
-        text-align: center;
-    }
-    .faces {
-        width: 32px;
-        height: 32px;
-        position: absolute;
-        right: 12px;
-    }
-    .smile {
-        fill: green;
-        opacity: 0.5;
-        top: 42px;
-    }
-    .sad {
-        fill: red;
-        opacity: 0.5;
-        bottom: 49px;
-    }
+/* gauges */
+.gauge_td {
+    text-align: center;
+    vertical-align: top;
+    font-size: 14px;
+    color: #542365;
+}
+.gauge_td .gauge_wrapper {
+    background: linear-gradient(to right, white 15%, #e9c8de);
+    border-top: 2px solid #542365;
+    height: 102px;
+}
+.gauge_title {
+    height: 18px;
+    font-size: 16px;
+    text-align: left;
+}
+
+/* filters */
+label {
+    padding: 2px 10px 2px 2px;
+    min-width: 100px;
+    font-weight: 100;
+    display: block;
+    white-space: nowrap;
+    float: left;
+}
+label input {
+    vertical-align: middle;
+    margin: auto !important;
+}
+label .inliner {
+    vertical-align: middle;
+}
+.dark_color_square {
+    background-color: #e9c8de;
+    font-weight: 900;
+}
+.grad_color_square {
+    background: linear-gradient(to right, #f7f5f8, #f6ebf3);
+}
+.grouper {
+    border: 1px solid gray;
+}
+label, input[type=checkbox] {
+    cursor: pointer;
+}
+
+.legend {
+    font-family: "Arial Narrow", "Liberation Sans Narrow", Arial, sans-serif;
+    color: gray;
+    font-size: 14px;
+    background-color: #f6ebf3;
+    margin-left: 10px;
+    display: block;
+    padding: 5px;
+    min-height: 94px;
+}
+.legend td {
+    vertical-align: top;
+}
+.legend_td {
+    vertical-align: top;
+    padding-top: 18px;
+}
+.bottom_gradient td {
+    height:10px;
+    background: linear-gradient(#f6ebf3, #ffffff);
+}
+
+#valency {
+    width: 30px;
+    border-bottom: 2px dashed orange;
+    height: 1px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+/* plots */
+.plot_td {
+    vertical-align: top;
+}
+
+.bk-canvas-events {
+    cursor: ew-resize
+}
+
+/* smiley faces, deprecated */
+{#.faces {#}
+{#    width: 32px;#}
+{#    height: 32px;#}
+{#    position: absolute;#}
+{#    right: 12px;#}
+{#}#}
+{#.smile {#}
+{#    fill: green;#}
+{#    opacity: 0.5;#}
+{#    top: 42px;#}
+{#}#}
+{#.sad {#}
+{#    fill: red;#}
+{#    opacity: 0.5;#}
+{#    bottom: 49px;#}
+{#}#}
 </style>

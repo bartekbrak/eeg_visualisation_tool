@@ -2,18 +2,18 @@
 <table id="mainframe">
 
     <tr><td></td><td  width="40"></td><td></td><td ></td></tr>
-    <tr>
+    <tr id="video_row">
         <td class="logo_td" colspan="2">
             <img id="logo" alt="Dom Badawczy Maison" src="data:image/png;base64,{{ brainvision }}"/>
             <div id="client">{{ client_info }}</div>
         </td>
 {#        <td></td>#}
         <td id="video_td">
-            <div class="video_border_up"></div>
+            <div class="video_border_up block"></div>
             <video width=640>
                 <source type="video/mp4" src="data:video/mp4;base64,{{video_data}}">
             </video>
-            <div class="video_border_down"></div>
+            <div class="video_border_down block"></div>
             <svg id="play-icon" class="icons" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1576 927l-1328 738q-23 13-39.5 3t-16.5-36v-1472q0-26 16.5-36t39.5 3l1328 738q23 13 23 31t-23 31z" fill="#fff"/>
             </svg>

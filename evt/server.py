@@ -29,6 +29,7 @@ from evt.utils import (
     distinct_colors,
     get_pickled_colors,
     color_pairs)
+from collections import defaultdict
 
 app = Flask(__name__, static_url_path='/evt/templates')
 
@@ -50,7 +51,6 @@ def server():
             GaugeColors(colors=get_pickled_colors(gauges_pickle, color_pairs[:2])),
         ]
     )
-    # embed()
     kwargs = {
         'get_end_user_file_url': url_for('.get_end_user_file'),
         'filesaver': url_for('static', filename='FileSaver.min.js'),
@@ -186,7 +186,6 @@ def get_figure(x_axis_len, **kwargs):
     f.xgrid.grid_line_width = 1
     f.ygrid.grid_line_color = '#dddddd'
     f.ygrid.grid_line_width = 1
-    # embed()
     return f
 
 
@@ -285,6 +284,7 @@ def the_meat(plots, sampling_rate, video_data, y_margin, colors=distinct_colors)
     progress_bar_y, progress_bar = get_progress_bar()
     titles = []
     gauge_colours = []
+    group_ids = defaultdict(lambda: defaultdict(list))
     for plot in plots:
         x_axis_len = len(plot['data'][0]['as']) * sampling_rate + sampling_rate
         for color_below, color_above in zip(*[iter(plot['no_of_plots']['colors'])] * 2):
@@ -303,6 +303,10 @@ def the_meat(plots, sampling_rate, video_data, y_margin, colors=distinct_colors)
                     average_yaxis_by_properties_separate,
                     itertools.cycle(colors)
                 )
+                for group_name, lines in line_groups.items():
+                    for line in lines:
+                        description = line.description[group_name]
+                        group_ids[group_name][description].append(line.source._id)
                 line_groups_per_plot.append(line_groups)
                 lines = list(itertools.chain(*line_groups.values()))
                 sources = map(attrgetter('data'), lines)
@@ -374,12 +378,15 @@ def the_meat(plots, sampling_rate, video_data, y_margin, colors=distinct_colors)
         'video_data': video_data,
         'line_groups_per_plot': line_groups_per_plot,
         'totals': totals,
+        'totals_ids': [_.source._id for _ in totals],
         'valencies': valencies,
+        'valencies_ids': [_.source._id for _ in valencies],
         'plots': plots,
         'script': script,
         'gauge_colours': gauge_colours,
         'titles': titles,
-        'legend': 'vertical' if len(plots) == 1 else 'horizontal'
+        'group_ids': group_ids
+        # 'legend': 'vertical' if len(plots) == 1 else 'horizontal'
     }
     template_args.update(get_inline_statics())
     return layout, template_args

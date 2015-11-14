@@ -61,8 +61,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 y: evt.line_y
             });
         },
-        line_toggle: function (input) {
-            var id = $(input).data('id');
+        lines_toggle: function(input) {
+            if ($(input).attr('data-ids')) {
+                $.each($(input).data('ids'), function(index, id) {
+                    evt.line_toggle(input, id);
+                })
+
+            } 
+            // else evt.line_toggle(input);
+        },
+        line_toggle: function (input, id) {
+            // var id = $(input).data('id');
             var line = evt.lines[id];
             if (input.checked)
                 line.cds.set('data', line.cds_orig_data);
@@ -168,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var togglers = 'input.toggler[data-group-name="' + group_name + '"]'
         evt.groupers[group_name] = $(togglers);
     });     
-    $('input.toggler').change(function() {evt.line_toggle(this); });
+    $('input.toggler').change(function() {evt.lines_toggle(this); });
     $('input.grouper').change(function() {
         var group_name = $(this).data('group-name');
         evt.groupers[group_name].prop('checked', this.checked);

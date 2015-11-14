@@ -1,4 +1,4 @@
-<table class="legend" id="legend{{ loop.index0 }}">
+<table class="legend">
 <tr><td id="legend_v_upper_gradient"></td></tr>
 <tr>
 
@@ -11,7 +11,8 @@
             type="checkbox"
             class="toggler"
             checked
-            data-id="{{ total.source._id }}">
+            data-ids='{{ totals_ids|tojson }}'
+            >
     <span class="inliner" style="color: {{ total.color }}">Total</span>
     </label>
     <br/>
@@ -20,7 +21,8 @@
             type="checkbox"
             class="toggler"
             checked
-            data-id="{{ valency.source._id }}">
+            data-ids='{{ valencies_ids|tojson }}'
+            >
     <span class="inliner" style="color: {{ valency.color }}">Średnia<div id="valency"></div></span>
     </label>
 </td></tr>
@@ -39,6 +41,8 @@
                 type="checkbox"
                 class="toggler"
                 data-id="{{ line.source._id }}"
+                {# the ugliest shit ever, I know #}
+                data-ids='{{ group_ids[line.description.keys().0][line.description.values().0]|tojson }}'
                 data-group-name="{{ outer_loop.index0 }}-{{ group_name }}">
         {% for filter, value in line.description.items() %}
             <span class="inliner" style="color: {{ line.color }}">{{ value }}</span>

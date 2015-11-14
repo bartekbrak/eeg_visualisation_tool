@@ -5,8 +5,8 @@
 <title>{{ title if title else "Plot" }}</title>
     {{ plot_resources|indent(8) }}
     {{ script|indent(8) }}
-{% include 'result/js.html' %}
-{% include 'result/css.html' %}
+{% include 'evt/js.jinja2' %}
+{% include 'evt/css.jinja2' %}
 </head>
-{% include 'result/body.html' %}
+{% include 'evt/body.jinja2' %}
 </html>

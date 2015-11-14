@@ -111,7 +111,7 @@ def get_end_user_file():
             '\r', '\n').replace('\n', '\n\n'))
         content = render_template(
             layout,
-            template=template_env.get_template('result/result.html'),
+            template=template_env.get_template('evt/evt.jinja2'),
             client_info=client_info,
             **template_args
         )
@@ -254,7 +254,7 @@ def standalone():
     content = render_template(
         layout,
         '',
-        template=template_env.get_template('result/result.html'),
+        template=template_env.get_template('evt/evt.jinja2'),
         client_info=markdown(
             u'Nazwa Klienta:  \n**Nazwa Klienta**\n\n'
             u'Nazwa Badania:  \n**Nazwa Badania**\n\n'

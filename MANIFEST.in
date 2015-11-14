@@ -1,3 +1,4 @@
 # syntax: https://docs.python.org/2/distutils/sourcedist.html#commands
 recursive-include evt/static *
 recursive-include evt/templates *.html
+recursive-include evt/templates *.jinja2

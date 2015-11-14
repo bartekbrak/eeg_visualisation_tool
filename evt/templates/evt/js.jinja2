@@ -16,36 +16,42 @@ document.addEventListener('DOMContentLoaded', function() {
         ;
     evt = {
         video: document.querySelector('video'),
+        // bool User is dragging the progress bar
         dragging: null,
+        // int, holds horizontal position of mouse pointer over the plot
         hover_position: 0,
+        // int, clip time in milis and progress bar position
         progress: 0,
-        // progress bar line y coordinates, two x values that are always bigger than the plot itself 
+        // progress bar line y coordinates,
+        // two x values that are always bigger than the plot itself
         line_y: {{ progress_bar_y }},
+        // progress bar line column data source reference
         progress_bar: CDS.get('{{ progress_bar_id }}'),
         // how often to redraw progress bar position in miliseconds
         update_resolution: 10,
-        // all lines identified by their id
+        // all plot lines identified by their id
         lines: {},
         // grouper togglers relations
         groupers: {},
         no_of_plots: plot_wrapper.length,
-        // play / pause icons
+        // current play|pause icon, relates to video state
         icon: null,
         icons: $(".icons"),
         play_icon: $("#play-icon"),
         pause_icon: $("#pause-icon"),
-        mouse_on_video: true,
+        mouse_over_video: true,
         // functions
         progress_bar_loop: function () {
+            // make thim as slim as possible, this references itself in a loop
             if (! evt.video.paused) {
                 evt.update_progress_bar();
                 evt.move_gauges();
-{#                $("#timer").html(evt.fromSeconds(evt.video.currentTime));#}
             };
-            if (evt.mouse_on_video) {
+            if (evt.mouse_over_video) {
                 evt.icons.hide();
                 evt.icon.show();
             } else evt.icons.hide();
+            // call yourself
             setTimeout(evt.progress_bar_loop, evt.update_resolution);
         },
         update_progress_bar: function () {
@@ -77,14 +83,15 @@ document.addEventListener('DOMContentLoaded', function() {
             evt.video.currentTime = evt.hover_position;
             evt.update_progress_bar();
         },
-        // used for obsolete, custom timer
-        fromSeconds: function (seconds) {
-            var m = ('0' + Math.floor(seconds / 60)).slice(-2);
-            var s = ('0' + parseInt(seconds % 60, 10)).slice(-2);
-            var ms = ('' + (seconds % 1).toFixed(3)).slice(2, 5);
-            if (isNaN(ms)) ms = '000';
-            return m + ':' + s + ':' + ms
-        },
+        // used for obsolete, custom timer, might be useful when the client
+        // remembers that they actually do want timer
+{#        fromSeconds: function (seconds) {#}
+{#            var m = ('0' + Math.floor(seconds / 60)).slice(-2);#}
+{#            var s = ('0' + parseInt(seconds % 60, 10)).slice(-2);#}
+{#            var ms = ('' + (seconds % 1).toFixed(3)).slice(2, 5);#}
+{#            if (isNaN(ms)) ms = '000';#}
+{#            return m + ':' + s + ':' + ms#}
+{#        },#}
         gauges: {},
         move_gauges: function () {
             for (var i=0; i < evt.no_of_plots; i++) {
@@ -96,12 +103,14 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     evt.icon = evt.play_icon;
 
+    // Create gauges
     plot_wrapper.each(function(index) {
-        // Append legends to plots, create gauges
         var gauge = $('#gauge' + index).get(0);
         evt.gauges[index] = {
             'gauge': new Gauge(gauge)
         };
+        // legends uset to be per plot, now there's only one, but leave this
+        // they might want to revert this when they start using this
 {#        $('#legend' + index).appendTo($('.bk-plot-right:eq(' + index + ')'));#}
 {#        $(gauge).appendTo('.bk-plot-left:eq(' + index + ')');#}
 {#        $('#smile' + index).appendTo('.bk-canvas-wrapper:eq(' + index + ')')#}
@@ -124,10 +133,8 @@ document.addEventListener('DOMContentLoaded', function() {
         gauge['gauge'].set({{ total.mean }});
     {% endfor %}
 
-
-
+    // Populate lines for further toggling
     {% for line_groups in line_groups_per_plot %}
-        // Populate lines for further toggling
         {% for lines in line_groups.values() %}
             {% for line in lines %}
                 var line_cds = CDS.get('{{ line.source._id }}');
@@ -148,7 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var valency_cds = CDS.get('{{ valency.source._id }}');
         var valency_id = '{{ valency.source._id }}';
         evt.lines[valency_id] = {cds: valency_cds, cds_orig_data: valency_cds.get('data')};
-        $('.gauge_wrapper:eq({{ loop.index0 }})').append('<br>średnia: ' + Number(({{ valency.mean }}).toFixed(3)));
+        var mean_safe = Number(({{ valency.mean }}).toFixed(3));
+        var index = '{{ loop.index0 }}';
+        $('.gauge_wrapper:eq(' + index + ')').append('<br>średnia: ' + mean_safe);
     {% endfor %}    
 
     // Toggler is an input connected with one line, grouper groups togglers
@@ -187,13 +196,12 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
         }
     });
-    // evt.video.addEventListener('mousedown', evt.toggle_video);
     $('#video_td').hover(
         function() {
-            evt.mouse_on_video = true;
+            evt.mouse_over_video = true;
         },
         function() {
-            evt.mouse_on_video = false;
+            evt.mouse_over_video = false;
         }
     ).mousedown(evt.toggle_video);
     // prevent leaving focus on the checkbox, we use space to toggle video

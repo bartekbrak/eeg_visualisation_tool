@@ -1,4 +1,5 @@
 import itertools
+import json
 import os
 import pickle
 import traceback
@@ -28,7 +29,7 @@ from evt.utils import (
     average_yaxis_by_properties_separate,
     distinct_colors,
     get_pickled_colors,
-    color_pairs)
+    color_pairs, uniform_list, SetEncoder)
 from collections import defaultdict
 
 app = Flask(__name__, static_url_path='/evt/templates')
@@ -75,36 +76,38 @@ def get_video_len(video_data):
 
 @app.route('/get_end_user_file', methods=('POST',))
 def get_end_user_file():
-    logger = ''
+    logger = []
     try:
         data_file = request.files['data_file']
         video_content = request.files['clip'].read()
-        logger += 'Video length in bytes: %s\n' % len(video_content)
+        logger += ['Video length in bytes: %s\n' % len(video_content)]
         video_encoded = b64encode(video_content)
         form = ServerForm(request.form)
 
         pickle.dump(form.data['colors'], open(palette_pickle, 'w'))
         # pickle.dump(form.data['no_of_plots'][0], open(gauges_pickle, 'w'))
         video_len, all_video_lens = get_video_len(video_content)
-        logger += 'duration: %s out of %s\n' % (video_len, all_video_lens)
+        logger += ['duration: %s out of %s\n' % (video_len, all_video_lens)]
         # plots = [int(_) for _ in form.data['no_of_plots'].split(',')]
         sheets = get_from_excel(data_file)
-        logger += 'sheets: %s' % [
+        logger += ['sheets: %s' % [
             [_['filter_column_names'], _['title']]
             for _ in sheets
-            ]
+            ]]
         plots = []
         # will truncate sheets if no_of_plots is smaller
         for no_of_plots, sheet in zip(form.data['no_of_plots'], sheets):
             plots.append(dict(no_of_plots=no_of_plots, **sheet))
         _validate_data_length(form.data['sampling_rate'], sheets, video_len)
 
+        validate_sheets_uniformity(plots, logger)
+
         layout, template_args = the_meat(
             plots=plots,
             sampling_rate=form.data['sampling_rate'],
             video_data=video_encoded,
             y_margin=form.data['y_margin'],
-            colors=form.data['colors']
+            colors=form.data['colors'],
         )
         template_args.update(**form.data)
         client_info = markdown(form.data['client_info_markdown'].replace(
@@ -119,7 +122,7 @@ def get_end_user_file():
     except Exception as e:
         return jsonify(
             status='error',
-            traceback=logger + traceback.format_exc(),
+            traceback=str('\n'.join(logger)) + '\n' + traceback.format_exc(),
             message=e.message
         )
 
@@ -230,7 +233,7 @@ def standalone():
     video_encoded = b64encode(video_content)
     video_len, all_video_lens = get_video_len(video_content)
     print 'duration: %s out of %s' % (video_len, all_video_lens)
-    plots = [
+    plots_ = [
         {
             'colors': ['#e8536b', '#bbc171',]
         },
@@ -240,16 +243,17 @@ def standalone():
     ]
     sheets = get_from_excel(args.data)
 
-    tp = []
+    plots = []
     # will truncate sheets if no_of_plots is smaller
-    for no_of_plots, sheet in zip(plots, sheets):
-        tp.append(dict(no_of_plots=no_of_plots, **sheet))
+    for no_of_plots, sheet in zip(plots_, sheets):
+        plots.append(dict(no_of_plots=no_of_plots, **sheet))
 
     rate = 100
     y_margin = 0.2
 
     _validate_data_length(rate, sheets, video_len)
-    layout, template_args = the_meat(tp, rate, video_encoded, y_margin)
+    validate_sheets_uniformity(plots, '')
+    layout, template_args = the_meat(plots, rate, video_encoded, y_margin)
     content = render_template(
         layout,
         '',
@@ -390,6 +394,31 @@ def the_meat(plots, sampling_rate, video_data, y_margin, colors=distinct_colors)
     }
     template_args.update(get_inline_statics())
     return layout, template_args
+
+
+def validate_sheets_uniformity(plots, logger):
+    # In order for legend to be able to control all plots at the same time
+    # the sheets need to have same column names and the scope of these columns
+    # need to be identical
+    sheets_columns = [p['filter_column_names'] for p in plots]
+    logger += [u'filter_column_names: ' + unicode(sheets_columns) + '\n']
+    assert uniform_list(
+        sheets_columns), 'All sheets must contain identical filter columns'
+    scopes = []
+    for plot in plots:
+        scope = defaultdict(set)
+        for line in plot['data']:
+            for column_name, v in line.items():
+                if column_name != 'as':
+                    scope[column_name].add(v)
+        scopes.append(scope)
+    logger += [
+        u'scopes: ' +
+        json.dumps(scopes, cls=SetEncoder, ensure_ascii=True, indent=4) +
+        '\n'
+    ]
+    assert uniform_list(
+        scopes), 'The scopes of every filter should be the same across sheets'
 
 
 def get_inline_statics():

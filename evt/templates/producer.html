@@ -41,8 +41,9 @@
         display: block;
     }
     #traceback {
-        white-space: pre;
+        white-space: pre-wrap;
         font-family: monospace;
+        padding: 5px;
     }
     #pkg_version {
         color: rgba(200, 200, 200, 0.1);
@@ -123,7 +124,7 @@ $(document).ready(function() {
                     'Log serwera:\n' + xhr.responseJSON.traceback);
                 saveAs(blob, "evt.html");
             } else {
-                $('#traceback').css('color', 'red').html(xhr.responseJSON.traceback);
+                $('#traceback').css('color', 'red').css('border', '1px solid red').html(xhr.responseJSON.traceback);
                 message = xhr.responseJSON.message;
                 text = message + '\n\nSomething went wrong.\n' +
                         'If the message above does not help\n' +

@@ -2,6 +2,7 @@ import itertools
 import os
 import pickle
 from operator import itemgetter
+import json
 
 from numpy import mean
 
@@ -77,3 +78,16 @@ def get_pickled_colors(filename=palette_pickle, default=None):
         return default
     with open(filename) as f:
         return pickle.load(f)
+
+
+def uniform_list(l):
+    # True if all elements are equal
+    return l.count(l[0]) == len(l)
+
+
+class SetEncoder(json.JSONEncoder):
+    # JSON encode structures containing setes
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)

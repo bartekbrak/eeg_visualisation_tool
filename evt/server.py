@@ -235,9 +235,9 @@ def standalone():
         {
             'colors': ['#e8536b', '#bbc171',]
         },
-        # {
-        #     'colors': ['#97d3db', '#f0e27c']
-        # },
+        {
+            'colors': ['#97d3db', '#f0e27c']
+        },
     ]
     sheets = get_from_excel(args.data)
 
@@ -328,13 +328,16 @@ def the_meat(plots, sampling_rate, video_data, y_margin, colors=distinct_colors)
             total_data = dict(x=x_range, y=total)
             total_cds = ColumnDataSource(data=total_data)
             valency = get_mean(plot['data'])
+            # we want gauge to have zero in the middle
+            gauge_boundary = abs(
+                max(numpy.min(total), numpy.max(total), key=abs))
             total_line = Line(
                 total,
                 total_cds,
                 'no description',
                 'red',
-                numpy.min(total),
-                numpy.max(total),
+                -gauge_boundary,
+                gauge_boundary,
                 0,  # or valency
                 continuous_array(x_range, total)
             )

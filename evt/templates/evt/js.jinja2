@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
             evt.video.pause();
             evt.video.currentTime = evt.hover_position;
             evt.update_progress_bar();
+            evt.move_gauges();
         },
         // used for obsolete, custom timer, might be useful when the client
         // remembers that they actually do want timer
